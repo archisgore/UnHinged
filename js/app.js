@@ -459,16 +459,18 @@ let hintHidden = false;
 function hideHint() { if (!hintHidden) { hintHidden = true; $("#swipe-hint").style.opacity = "0"; } }
 
 /* ───────── Confetti ───────── */
-const cv = $("#confetti"), ctx = cv.getContext("2d");
+const cv = $("#confetti");
+const ctx = cv ? cv.getContext("2d") : null;
 let parts = [], raf = null;
 function sizeConfetti() {
+  if (!ctx) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 addEventListener("resize", () => { sizeConfetti(); });
 function confettiBurst(n, gold) {
-  if (reduceMotion) return;
+  if (reduceMotion || !ctx) return;
   const colors = gold ? ["#FFD15C", "#FF3D6E", "#FF6B8A", "#fff"] : ["#FF3D6E", "#FF6B8A", "#4a9bff", "#17c964", "#FFD15C"];
   const cx = innerWidth / 2, cy = innerHeight * 0.4;
   for (let i = 0; i < n; i++) {
