@@ -2,10 +2,11 @@
 // the profiles are generated on-device, so once cached, Unhinged works with no
 // network at all — swipe on a plane, in a bunker, wherever.
 
-const CACHE = "unhinged-v1";
+const CACHE = "unhinged-v2";
 const ASSETS = [
   ".",
   "index.html",
+  "terms.html",
   "styles.css",
   "manifest.webmanifest",
   "assets/logo.svg",

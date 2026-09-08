@@ -148,12 +148,22 @@ const AI_ARTIFACTS = [
   "this jawline is load-bearing",
 ];
 
+// Fake "compatibility" — algorithm theater. Mostly high (everyone's a great
+// match when no one is real); occasionally a gloriously broken number.
+function fakeCompat(r) {
+  if (r.chance(0.1)) return r.pick(["404%", "∞%", "-7%", "0.7%", "NaN%", "yes%"]);
+  return r.int(72, 99) + "%";
+}
+
 export function makeProfile(seed) {
   const r = rngFrom("unhinged:" + seed);
   const promptSet = r.some(PROMPTS, 3).map(([q, answers]) => ({
     q,
     a: r.pick(answers),
   }));
+
+  // Variable-ratio jackpot: ~1 in 11 profiles is a "Certified Standout".
+  const legendary = r.chance(1 / 11);
 
   return {
     id: String(seed),
@@ -168,6 +178,8 @@ export function makeProfile(seed) {
     prompts: promptSet,
     greenflag: r.pick(RED_AS_GREEN),
     artifact: r.chance(0.7) ? r.pick(AI_ARTIFACTS) : null,
+    compat: fakeCompat(r),
+    legendary,
     matchLine: r.pick([
       "It's a match! Neither of you is real. Perfect.",
       "You matched! Now what. Exactly. Nothing.",
