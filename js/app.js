@@ -156,7 +156,7 @@ function startApp() {
 
 // Optional buffer of backend-served profiles (flag-gated; empty otherwise).
 const remoteBuf = [];
-let remoteCursor = 0;
+let remoteCursor = Math.floor(Math.random() * 500); // random start → sessions see different slices
 async function refillRemote() {
   if (remoteBuf.length >= 6) return;
   const pg = await fetchProfiles(remoteCursor, 20); // null unless FEATURES.remoteProfiles

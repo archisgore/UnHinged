@@ -28,8 +28,8 @@ def _compat(r: random.Random) -> str:
     return f"{r.randint(72, 99)}%"
 
 
-def make_profile(i: int) -> dict[str, Any]:
-    seed = f"unhinged:{i}"
+def make_profile(i: int, salt: int = 0) -> dict[str, Any]:
+    seed = f"unhinged:{i}" if salt == 0 else f"unhinged:{i}.{salt}"
     r = _rng(seed)
     prompts = [{"q": q, "a": r.choice(answers)} for q, answers in r.sample(content.PROMPTS, 3)]
     n_interests = r.randint(3, 5)
@@ -53,8 +53,24 @@ def make_profile(i: int) -> dict[str, Any]:
     }
 
 
+def _build_pack() -> list[dict[str, Any]]:
+    """Generate the pack once, re-rolling so no two *adjacent* profiles share a
+    name (otherwise a run of the same name looks like a bug in the deck)."""
+    pack: list[dict[str, Any]] = []
+    prev_name: str | None = None
+    for i in range(PACK_SIZE):
+        p = make_profile(i)
+        salt = 0
+        while p["name"] == prev_name and salt < 6:
+            salt += 1
+            p = make_profile(i, salt)
+        prev_name = p["name"]
+        pack.append(p)
+    return pack
+
+
 # Generated once, cached for the process lifetime.
-_PACK: list[dict[str, Any]] = [make_profile(i) for i in range(PACK_SIZE)]
+_PACK: list[dict[str, Any]] = _build_pack()
 
 
 def page(cursor: int, limit: int) -> dict[str, Any]:
