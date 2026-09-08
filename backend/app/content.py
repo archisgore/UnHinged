@@ -155,8 +155,18 @@ MATCH_LINES = [
 PITCHES = [
     "You won't find your soulmate here. But you WILL be entertained. That's the trade.",
     "99% of dating apps are fake profiles. We rounded up to 100% and stopped lying about it.",
+    "Swipe for hours. Owe nothing. Not even a phone number.",
+    "It's not ghosting if they were never alive.",
+    "Finally, a match rate of 0% and a satisfaction rate of yes.",
     "All the dopamine of dating. None of the human beings.",
+    "We can't break your heart. We don't have your data. We barely have a server.",
     "Other apps monetize your loneliness. We just make fun of it, for free.",
+    "Certified 100% AI slop. The good kind. The kind that doesn't text your ex.",
+    "Think of it as a lava lamp for people who used to have crushes.",
+    "Every face here is a person who does not exist. Refreshing, isn't it?",
+    "The only app where being AI-generated slop is the whole point.",
+    "No profile is real, so no rejection is either. Swipe fearlessly.",
+    "An infinite deck of nobody. Enjoy responsibly.",
 ]
 
 TAGLINE = "The dating app that's finally honest: everyone's fake."

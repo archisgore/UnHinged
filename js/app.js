@@ -4,6 +4,7 @@ import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
 import { fetchProfiles, fetchCopy, tally, fetchStats } from "./net.js";
+import "./analytics.js";
 
 const $ = (sel) => document.querySelector(sel);
 

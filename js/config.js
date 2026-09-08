@@ -12,6 +12,12 @@ export const API = local ? "http://localhost:8000/api" : "https://api.unhinged.l
 export const FEATURES = {
   accounts: false,       // there are no accounts; the buttons refuse, on purpose
   remoteProfiles: true,  // fetch cached profiles from the backend (falls back to on-device generation)
-  remoteCopy: false,     // bundled copy is richer than the backend subset; keep local for now
+  remoteCopy: true,      // pull rotating punchlines from the backend (falls back to bundled copy)
   tally: true,           // powers the global "N holograms judged" counter (anonymous, no PII)
+};
+
+// Privacy-friendly analytics. Cookieless, aggregate-only, no PII — matching the
+// ToS. OFF until you set a domain (see js/analytics.js).
+export const ANALYTICS = {
+  plausibleDomain: null, // e.g. "unhinged.love" once a Plausible site exists
 };

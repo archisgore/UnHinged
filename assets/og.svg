@@ -1,0 +1,40 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF6B8A"/><stop offset="1" stop-color="#FF3D6E"/>
+    </linearGradient>
+    <linearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FF6B8A"/><stop offset="1" stop-color="#FF3D6E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- app icon card -->
+  <g transform="translate(96 176)">
+    <rect width="220" height="220" rx="52" fill="#fff"/>
+    <g transform="translate(46 42) scale(1.08)">
+      <line x1="18" y1="18" x2="18" y2="104" stroke="#C9C2C6" stroke-width="6" stroke-linecap="round"/>
+      <rect x="4" y="18" width="28" height="34" rx="10" fill="#E7E1E4" stroke="#C9C2C6" stroke-width="4"/>
+      <rect x="4" y="82" width="28" height="34" rx="10" fill="#E7E1E4" stroke="#C9C2C6" stroke-width="4"/>
+      <circle cx="18" cy="67" r="7" fill="#B8B0B4"/>
+      <g transform="rotate(13 78 74)">
+        <path d="M78 116 C78 116 30 78 30 46 C30 32 42 22 55 22 C67 22 74 31 78 40 C82 31 89 22 101 22 C114 22 126 32 126 46 C126 78 78 116 78 116 Z" fill="url(#heart)"/>
+      </g>
+      <g transform="translate(104 20)"><circle r="10" fill="#FFD15C" stroke="#E8B94A" stroke-width="3"/><line x1="-5" y1="0" x2="5" y2="0" stroke="#B9922E" stroke-width="3" stroke-linecap="round" transform="rotate(35)"/></g>
+    </g>
+  </g>
+
+  <!-- text -->
+  <text x="360" y="250" font-family="ui-rounded, SF Pro Rounded, system-ui, sans-serif" font-size="110" font-weight="800" fill="#fff" letter-spacing="-3">unhinged</text>
+  <text x="362" y="322" font-family="system-ui, sans-serif" font-size="30" font-weight="700" fill="#ffe3ea" letter-spacing="2">THE DATING APP FIDGET SPINNER</text>
+  <text x="362" y="410" font-family="system-ui, sans-serif" font-size="38" font-weight="600" fill="#fff">Every profile is 100% certified fake.</text>
+  <text x="362" y="460" font-family="system-ui, sans-serif" font-size="38" font-weight="600" fill="#fff">Swipe anyway.</text>
+
+  <!-- footer chips -->
+  <g font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#fff">
+    <g transform="translate(96 520)"><rect width="230" height="52" rx="26" fill="#ffffff" fill-opacity="0.22"/><text x="115" y="34" text-anchor="middle">✦ 0% tracking</text></g>
+    <g transform="translate(342 520)"><rect width="220" height="52" rx="26" fill="#ffffff" fill-opacity="0.22"/><text x="110" y="34" text-anchor="middle">✦ 0 accounts</text></g>
+    <g transform="translate(578 520)"><rect width="270" height="52" rx="26" fill="#ffffff" fill-opacity="0.22"/><text x="135" y="34" text-anchor="middle">✦ 100% AI slop</text></g>
+  </g>
+  <text x="1104" y="556" text-anchor="end" font-family="system-ui, sans-serif" font-size="26" font-weight="800" fill="#fff">unhinged.love</text>
+</svg>
