@@ -168,17 +168,25 @@ _warm_lock = threading.Lock()
 
 
 def warm(chunk: int = 40) -> dict[str, Any]:
-    """Pre-generate the next `chunk` cliché photos onto the volume. Gentle."""
+    """Grow the corpus by ~`chunk`, filling any MISSING ids up to the new
+    frontier (so rate-limit gaps self-heal) at a gentle pace. Cached ids are
+    skipped instantly, so re-scanning from 0 is cheap."""
     if not ENABLED:
         return {"enabled": False}
-    start = _read_frontier()
-    warmed = 0
-    for i in range(start, start + chunk):
-        if get(str(i), timeout=120):  # generation can be slow; the warmer can wait
-            warmed += 1
-        _write_frontier(i + 1)  # persist progress incrementally (survives restarts)
-        time.sleep(0.5)  # be polite to the generator
-    return {"warmed": warmed, "frontier": start + chunk, "cached_faces": count_cached()}
+    target = _read_frontier() + chunk
+    generated = 0
+    for i in range(target):
+        if os.path.exists(path_for(str(i))):
+            continue  # already banked
+        ok = get(str(i), timeout=120)
+        if not ok:  # transient rate-limit? back off and retry once
+            time.sleep(3)
+            ok = get(str(i), timeout=120)
+        if ok:
+            generated += 1
+        time.sleep(1.2)  # gentle on the shared free generator
+    _write_frontier(target)
+    return {"generated": generated, "frontier": target, "cached_faces": count_cached()}
 
 
 def warm_async(chunk: int = 40) -> dict[str, Any]:
