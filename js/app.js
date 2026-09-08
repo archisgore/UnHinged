@@ -169,9 +169,11 @@ function startApp() {
 // Optional buffer of backend-served profiles (flag-gated; empty otherwise).
 const remoteBuf = [];
 let remoteCursor = Math.floor(Math.random() * 500); // random start → sessions see different slices
-// Prefer starting within the pre-warmed range so first photos are instant.
+// Prefer starting within the pre-warmed range so first photos are instant, and
+// prefetch a page so the very first cards are cliché photos (not on-device SVGs).
 fetchCorpus().then((c) => {
   if (c && c.frontier > 0) remoteCursor = Math.floor(Math.random() * c.frontier);
+  refillRemote();
 });
 async function refillRemote() {
   if (remoteBuf.length >= 6) return;

@@ -176,8 +176,8 @@ def warm(chunk: int = 40) -> dict[str, Any]:
     for i in range(start, start + chunk):
         if get(str(i), timeout=120):  # generation can be slow; the warmer can wait
             warmed += 1
+        _write_frontier(i + 1)  # persist progress incrementally (survives restarts)
         time.sleep(0.5)  # be polite to the generator
-    _write_frontier(start + chunk)
     return {"warmed": warmed, "frontier": start + chunk, "cached_faces": count_cached()}
 
 
