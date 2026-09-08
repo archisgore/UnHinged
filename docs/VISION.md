@@ -12,9 +12,13 @@ is the sole exception, as stated in the [Terms of Service](../terms.html).
 
 Two concrete jobs (see [`backend/`](../backend/) for the first cut):
 
-1. **Serve & cache profiles.** Stop regenerating profiles in every browser.
-   Pregenerate an unhinged profile pack server-side, cache it, and serve it so
-   the deck is consistent across visitors and cheap to load.
+1. **Serve profiles + grow the corpus.** Profiles are unbounded (any id → a
+   deterministic profile), so the deck is genuinely infinite. Faces accumulate:
+   a scheduled job (`.github/workflows/warm.yml`, every 6h) calls token-gated
+   `POST /api/admin/warm` to bank the next chunk of StyleGAN faces onto the
+   volume, advancing a persisted frontier; `GET /api/corpus` reports growth. The
+   feed is combinatorial (near-infinite). So the ready content keeps growing over
+   time toward effectively infinite — "always fresh".
 
    **Photorealistic AI faces — SHIPPED.** `backend/app/faces.py` lazily fetches a
    StyleGAN face (thispersondoesnotexist.com — people who don't exist, exactly the
