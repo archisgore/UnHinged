@@ -1,35 +1,32 @@
-# Fly.io config (mirrors the WineTone deploy style). Deploy with:
-#   cd backend && fly launch --no-deploy   # first time, to create the app
-#   fly deploy
-# Then point the frontend's API base (js/config.js) at https://<app>.fly.dev
-# and set a DNS CNAME api.unhinged.love -> <app>.fly.dev.
+# fly.toml app configuration file generated for unhinged-api on 2026-09-08T09:44:03-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "unhinged-api"
-primary_region = "sjc"
+app = 'unhinged-api'
+primary_region = 'sjc'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  PORT = "8000"
-  # Ephemeral SQLite counter by default. For a durable counter, attach a Fly
-  # volume and set UNHINGED_DB to a path on it, or swap store.py for Neon.
-  UNHINGED_DB = "/data/data.db"
+  PORT = '8000'
+  UNHINGED_DB = '/data/data.db'
 
 [http_service]
   internal_port = 8000
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
-[[http_service.checks]]
-  method = "GET"
-  path = "/api/health"
-  interval = "30s"
-  timeout = "5s"
+  [[http_service.checks]]
+    interval = '30s'
+    timeout = '5s'
+    method = 'GET'
+    path = '/api/health'
 
-# Uncomment to persist the counter across restarts:
-# [mounts]
-#   source = "unhinged_data"
-#   destination = "/data"
+[[vm]]
+  memory = '1gb'
+  cpus = 1
+  memory_mb = 1024
