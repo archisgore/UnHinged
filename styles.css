@@ -56,6 +56,8 @@ button { font-family: inherit; cursor: pointer; }
   transition: opacity .4s;
 }
 .fine-print { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+.feed-link-line { margin: 12px 0 0; font-size: 13px; }
+.feed-link-line a { color: var(--pink); font-weight: 700; text-decoration: none; }
 .holo-count { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
 .holo-count b { color: var(--pink); font-variant-numeric: tabular-nums; }
 .holo-count--sheet { margin-top: 18px; text-align: center; }
@@ -326,6 +328,25 @@ button { font-family: inherit; cursor: pointer; }
 .chip.deal { cursor: pointer; }
 .chip.deal.on { background: var(--grad); color: #fff; border-color: transparent; }
 .prefs-note { font-size: 13px; color: var(--muted); font-style: italic; border-top: 1px solid var(--line); padding-top: 14px; }
+
+/* ───────── The Feed ───────── */
+.feed-top {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: calc(12px + var(--safe-t)) 16px 12px; background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+}
+.feed-top .wordmark { font-size: 18px; }
+.feed-back { color: var(--muted); font-weight: 600; text-decoration: none; font-size: 14px; }
+.feed-back:hover { color: var(--pink); }
+.feed { max-width: 620px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.feed-intro { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 4px 0 6px; }
+.feed-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 8px 24px -16px rgba(29,26,28,.25); }
+.feed-text { font-size: 16px; line-height: 1.5; margin: 0 0 12px; }
+.feed-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--pink); margin-bottom: 8px; }
+.feed-head { font-size: 20px; line-height: 1.25; margin: 0 0 12px; letter-spacing: -.01em; }
+.feed-onion { background: linear-gradient(170deg,#fff,#fff6f8); }
+.feed-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; font-weight: 600; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.feed-more-wrap { text-align: center; padding: 8px 16px calc(40px + var(--safe-b)); }
 
 /* ───────── Legal / Terms page ───────── */
 .legal {

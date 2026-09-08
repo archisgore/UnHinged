@@ -32,7 +32,7 @@ fetchCopy().then((c) => { if (c && Array.isArray(c.pitches) && c.pitches.length)
 // Global "N holograms judged" counter (anonymous aggregate; best-effort).
 function setHolo(n) {
   if (typeof n !== "number") return;
-  const txt = `🛸 <b>${n.toLocaleString()}</b> holograms judged and counting`;
+  const txt = `🛸 <b>${n.toLocaleString()}</b> hologram${n === 1 ? "" : "s"} judged and counting`;
   for (const id of ["#holo-count", "#holo-count-about"]) {
     const el = $(id);
     if (el) { el.innerHTML = txt; el.hidden = false; }
