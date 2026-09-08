@@ -13,6 +13,11 @@ primary_region = 'sjc'
   PORT = '8000'
   UNHINGED_DB = '/data/data.db'
 
+# Persist the "holograms judged" counter across restarts/deploys.
+[mounts]
+  source = 'unhinged_data'
+  destination = '/data'
+
 [http_service]
   internal_port = 8000
   force_https = true
