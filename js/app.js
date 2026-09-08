@@ -1,10 +1,24 @@
 import { makeProfile, CERTIFIED } from "./generator.js";
-import { avatarSVG } from "./avatar.js";
 import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
-import { fetchProfiles, fetchCopy, tally, fetchStats, fetchCorpus } from "./net.js";
+import { fetchProfilesByIds, faceUrl, fetchCopy, tally, fetchStats, fetchCorpus } from "./net.js";
 import "./analytics.js";
+
+// Deterministic gradient per profile — the placeholder behind each photo while
+// it loads (and if it ever fails). Replaces the old procedural SVG avatars.
+const GRADS = [
+  "linear-gradient(135deg,#FFE29A,#FF9AA2)", "linear-gradient(135deg,#A0E9FF,#B980F0)",
+  "linear-gradient(135deg,#FBC2EB,#A6C1EE)", "linear-gradient(135deg,#84FAB0,#8FD3F4)",
+  "linear-gradient(135deg,#FCCB90,#D57EEB)", "linear-gradient(135deg,#F6D365,#FDA085)",
+  "linear-gradient(135deg,#E0C3FC,#8EC5FC)", "linear-gradient(135deg,#FDCBF1,#B6E1E0)",
+];
+function gradientFor(seed) {
+  let h = 0;
+  const s = String(seed);
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return GRADS[Math.abs(h) % GRADS.length];
+}
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -166,19 +180,38 @@ function startApp() {
   resetIdle();
 }
 
-// Optional buffer of backend-served profiles (flag-gated; empty otherwise).
+// Backend-served profiles in RANDOM, no-repeat order. `seen` is per-session
+// memory so every user gets a unique, non-repeating experience; ids are biased
+// toward the warmed range (instant photos) and the pool grows as you swipe.
 const remoteBuf = [];
-let remoteCursor = Math.floor(Math.random() * 500); // random start → sessions see different slices
-// Prefer starting within the pre-warmed range so first photos are instant, and
-// prefetch a page so the very first cards are cliché photos (not on-device SVGs).
+const seen = new Set();
+let warmFrontier = 0;
+let refilling = false;
+
 fetchCorpus().then((c) => {
-  if (c && c.frontier > 0) remoteCursor = Math.floor(Math.random() * c.frontier);
-  refillRemote();
+  if (c && typeof c.frontier === "number") warmFrontier = c.frontier;
+  refillRemote(); // prefetch so the first cards are photos, not placeholders
 });
+
+function pickUnseenId() {
+  const pool = Math.max(warmFrontier, seen.size * 2 + 20, 60);
+  for (let t = 0; t < 60; t++) {
+    const id = Math.floor(Math.random() * pool);
+    if (!seen.has(id)) { seen.add(id); return id; }
+  }
+  let id = 0;
+  while (seen.has(id)) id++;
+  seen.add(id);
+  return id;
+}
+
 async function refillRemote() {
-  if (remoteBuf.length >= 6) return;
-  const pg = await fetchProfiles(remoteCursor, 20); // null unless FEATURES.remoteProfiles
-  if (pg && pg.profiles) { remoteBuf.push(...pg.profiles); remoteCursor = pg.next_cursor; }
+  if (refilling || remoteBuf.length >= 6) return;
+  refilling = true;
+  const ids = Array.from({ length: 8 }, () => pickUnseenId());
+  const pg = await fetchProfilesByIds(ids); // null unless FEATURES.remoteProfiles / reachable
+  if (pg && pg.profiles) remoteBuf.push(...pg.profiles);
+  refilling = false;
 }
 
 function nextItem() {
@@ -187,9 +220,16 @@ function nextItem() {
   if (itemCount % interval === 0) {
     return { type: "inter", data: C.rotate(C.INTERSTITIALS, Math.floor(itemCount / interval)) };
   }
-  // Prefer a cached backend profile if available; always fall back on-device.
+  // Prefer a backend profile (random, no-repeat); fall back on-device but still
+  // give it a real backend photo so we never show the old SVG cartoons.
   refillRemote();
-  const profile = remoteBuf.length ? remoteBuf.shift() : makeProfile(seed++);
+  let profile;
+  if (remoteBuf.length) {
+    profile = remoteBuf.shift();
+  } else {
+    profile = makeProfile(seed++);
+    profile.image = faceUrl(pickUnseenId());
+  }
   return { type: "profile", profile };
 }
 
@@ -198,9 +238,8 @@ function addCard(item = nextItem()) {
   el.className = "card";
   el.__item = item;
   if (item.type === "profile") {
-    el.__svg = avatarSVG(item.profile.seed);
     if (item.profile.legendary) el.classList.add("legendary");
-    el.innerHTML = renderProfile(item.profile, el.__svg);
+    el.innerHTML = renderProfile(item.profile);
   } else {
     el.classList.add("inter");
     el.innerHTML = renderInterstitial(item.data);
@@ -227,7 +266,7 @@ function layout() {
 function topCard() { return cards[cards.length - 1]; }
 
 /* ───────── Rendering ───────── */
-function renderProfile(p, svg) {
+function renderProfile(p) {
   const chips = p.interests.map((x) => `<span class="chip">${x}</span>`).join("");
   const prompts = p.prompts
     .map((pr, i) => `
@@ -239,10 +278,10 @@ function renderProfile(p, svg) {
     .join("");
   const artifact = p.artifact ? `<div class="artifact-badge">⚠︎ AI artifact: ${p.artifact}</div>` : "";
   const standout = p.legendary ? `<div class="standout-ribbon">${C.JACKPOT.badge}</div>` : "";
-  // Show the procedural SVG instantly; if a photorealistic image is available,
-  // layer it on top. If it fails to load, it removes itself → SVG shows through.
-  const photo = svg + (p.image
-    ? `<img class="card-img" src="${p.image}" alt="AI-generated portrait" onerror="this.remove()"/>`
+  // A gradient placeholder shows instantly; the cliché photo fades in on top and
+  // removes itself if it ever fails to load, leaving the gradient.
+  const photo = `<div class="card-skel" style="background:${gradientFor(p.seed)}"></div>` + (p.image
+    ? `<img class="card-img" src="${p.image}" alt="AI-generated dating photo" onload="this.classList.add('loaded')" onerror="this.remove()"/>`
     : "");
   return `
     <div class="card-photo">
@@ -372,7 +411,7 @@ function finishSwipe(el, action) {
   sfx[action === "nope" ? "nope" : "like"]();
   setTimeout(() => {
     cards = cards.filter((c) => c !== el);
-    history.push({ item, svg: el.__svg });
+    history.push({ item });
     if (history.length > 20) history.shift();
     el.remove();
     addCard();
@@ -481,7 +520,6 @@ function rewind() {
   toast("Rewound. Reliving a moment that never happened.");
   if (cards.length >= KEEP) { const back = cards.shift(); back.remove(); }
   const el = addCard(last.item);
-  if (last.item.type === "profile") el.__svg = last.svg;
   deck.appendChild(el);
   cards = cards.filter((c) => c !== el);
   cards.push(el);
@@ -494,8 +532,8 @@ function showMatch(item, likedPrompt) {
   const p = item.profile;
   currentMatch = item;
   const legendary = p.legendary;
-  $("#match-face").innerHTML = avatarSVG(p.seed, 240) +
-    (p.image ? `<img class="face-img" src="${p.image}" alt="" onerror="this.remove()"/>` : "");
+  $("#match-face").innerHTML = `<div class="face-skel" style="background:${gradientFor(p.seed)}"></div>` +
+    (p.image ? `<img class="face-img" src="${p.image}" alt="" onload="this.classList.add('loaded')" onerror="this.remove()"/>` : "");
   $("#match-face").classList.toggle("legendary", !!legendary);
   $("#match-line").textContent = likedPrompt
     ? `They saw you like “${likedPrompt.a}”. It's a match. It means nothing. Enjoy!`
@@ -515,7 +553,8 @@ let chatItem = null;
 function openChat(item) {
   chatItem = item;
   const p = item.profile;
-  $("#chat-face").innerHTML = avatarSVG(p.seed, 80);
+  $("#chat-face").innerHTML = `<div class="face-skel" style="background:${gradientFor(p.seed)}"></div>` +
+    (p.image ? `<img class="face-img" src="${p.image}" alt="" onload="this.classList.add('loaded')" onerror="this.remove()"/>` : "");
   $("#chat-name").textContent = p.name;
   $("#chat-msgs").innerHTML = "";
   $("#chat-starters").innerHTML = C.CONVO_STARTERS

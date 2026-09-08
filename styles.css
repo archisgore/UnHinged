@@ -113,9 +113,20 @@ button { font-family: inherit; cursor: pointer; }
 .card.animating { transition: transform .35s cubic-bezier(.22,.61,.36,1), opacity .35s; }
 
 .card-photo { position: relative; height: 62%; flex: none; overflow: hidden; background: #f2f2f2; }
-.card-photo svg { width: 100%; height: 100%; display: block; }
-/* Photorealistic image layered over the SVG fallback. */
-.card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+/* Gradient placeholder shown while the photo loads (and if it fails). */
+.card-skel { position: absolute; inset: 0; z-index: 0; }
+.card-skel::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, rgba(255,255,255,0) 20%, rgba(255,255,255,.35) 40%, rgba(255,255,255,0) 60%);
+  background-size: 200% 100%; animation: shimmer 1.6s linear infinite;
+}
+/* The photorealistic cliché photo fades in over the placeholder. */
+.card-img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;
+  opacity: 0; transition: opacity .45s ease;
+}
+.card-img.loaded { opacity: 1; }
+@keyframes shimmer { to { background-position: -200% 0; } }
 .photo-fade {
   position: absolute; left: 0; right: 0; bottom: 0; height: 55%;
   background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0));
@@ -198,8 +209,9 @@ button { font-family: inherit; cursor: pointer; }
 .match-burst { font-size: 30px; font-weight: 800; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .match-burst span { color: var(--pink); }
 .match-face { position: relative; width: 120px; height: 120px; margin: 18px auto; border-radius: 50%; overflow: hidden; box-shadow: var(--card-shadow); }
-.match-face svg { width: 100%; height: 100%; }
-.face-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.face-skel { position: absolute; inset: 0; z-index: 0; }
+.face-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0; transition: opacity .35s ease; }
+.face-img.loaded { opacity: 1; }
 .match-line { font-size: 17px; font-weight: 700; margin: 6px 0 4px; }
 .match-footnote { font-size: 12px; color: var(--muted); margin: 0 0 20px; }
 
@@ -278,8 +290,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ───────── Chat ───────── */
 .chat-card { display: flex; flex-direction: column; height: 82dvh; padding-top: 18px; }
 .chat-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
-.chat-face { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; }
-.chat-face svg { width: 100%; height: 100%; }
+.chat-face { position: relative; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; }
 .chat-name { font-weight: 800; font-size: 17px; }
 .chat-status { font-size: 11px; color: #17c964; }
 .chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 2px; }

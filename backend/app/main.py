@@ -76,8 +76,14 @@ def _with_face(request: Request, p: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.get("/api/profiles")
-def profiles(request: Request, cursor: int = 0, limit: int = 10) -> dict[str, Any]:
-    """A page of cached profiles; wraps around for an endless deck."""
+def profiles(request: Request, cursor: int = 0, limit: int = 10, ids: str | None = None) -> dict[str, Any]:
+    """Profiles for a sequential page, or for a specific set of `ids` (comma-
+    separated) — the client uses `ids` to drive its own randomized, no-repeat
+    order so every session is unique."""
+    if ids:
+        want = [x for x in ids.split(",") if x.strip().isdigit()][:50]
+        profs = [p for x in want if (p := generator.by_id(x))]
+        return {"profiles": [_with_face(request, p) for p in profs]}
     data = generator.page(cursor, limit)
     return {**data, "profiles": [_with_face(request, p) for p in data["profiles"]]}
 

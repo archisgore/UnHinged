@@ -17,7 +17,8 @@ export const FEATURES = {
 };
 
 // Privacy-friendly analytics. Cookieless, aggregate-only, no PII — matching the
-// ToS. OFF until you set a domain (see js/analytics.js).
+// ToS. OFF until you set one of these (see js/analytics.js for how to get it).
 export const ANALYTICS = {
-  plausibleDomain: null, // e.g. "unhinged.love" once a Plausible site exists
+  cloudflareToken: null, // Cloudflare Web Analytics beacon token (recommended)
+  plausibleDomain: null, // alternative: e.g. "unhinged.love"
 };
