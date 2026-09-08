@@ -170,4 +170,38 @@ export const INSTALL = {
   toast: "Installed-ish. Now it lives on your home screen, judging quietly.",
 };
 
+// Parody auth — the buttons refuse, the form goes nowhere, the bit writes itself.
+export const AUTH = {
+  loginBtn: "Don't Login",
+  signupBtn: "Don't Signup",
+  title: (mode) => (mode === "signup" ? "Don't Sign Up" : "Don't Log In"),
+  blurb:
+    "Go ahead — fill it in. It goes absolutely nowhere. There's no account, no server keeping you, nothing remembering your face (we generate fake ones anyway). This form is performance art.",
+  email: "an email you'll regret typing",
+  password: "a password we solemnly won't keep",
+  submit: (mode) => (mode === "signup" ? "Don't Signup" : "Don't Login"),
+  justEnter: "…or just start doomswiping →",
+};
+
+export const SOUND = { on: "🔊", off: "🔇", label: "Toggle sound" };
+
+// Absurd preferences. They mostly do nothing — like all dating-app filters.
+export const PREFS = {
+  note: "None of this filters anyone — there's nothing to filter, everyone's equally fake. But moving sliders is a love language. Enjoy.",
+  lookingFor: {
+    label: "I'm looking for",
+    options: ["literally anyone (all fake)", "emotionally unavailable", "6 fingers, minimum",
+      "a language model in a trench coat", "someone geographically impossible"],
+  },
+  chaos: { label: "Chaos level", hint: ["serene void", "mild", "spicy", "unhinged", "feral"] },
+  maxDistance: {
+    label: "Max distance",
+    options: ["0.3 miles", "9,000 light-years", "inside my router", "doesn't matter, none are real"],
+  },
+  dealbreakers: {
+    label: "Dealbreakers (toggle for vibes)",
+    options: ["texts back", "is real", "has object permanence", "owns forks", "claps when the plane lands"],
+  },
+};
+
 export const rotate = (arr, i) => arr[i % arr.length];

@@ -1,6 +1,8 @@
 import { makeProfile, CERTIFIED } from "./generator.js";
 import { avatarSVG } from "./avatar.js";
 import * as C from "./copy.js";
+import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
+import { login, signup } from "./auth.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -39,6 +41,85 @@ document.querySelectorAll(".modal, .sheet").forEach((layer) =>
 function openLayer(id) { $("#" + id).hidden = false; }
 function closeLayer(id) { $("#" + id).hidden = true; }
 
+/* ───────── Sound toggle ───────── */
+$("#mute-btn").addEventListener("click", () => {
+  const nowMuted = !isMuted();
+  setMuted(nowMuted);
+  $("#mute-btn").textContent = nowMuted ? C.SOUND.off : C.SOUND.on;
+  if (!nowMuted) { initAudio(); sfx.tap(); }
+});
+
+/* ───────── Parody auth ───────── */
+$("#dont-login-btn").textContent = C.AUTH.loginBtn;
+$("#dont-signup-btn").textContent = C.AUTH.signupBtn;
+$("#auth-enter").textContent = C.AUTH.justEnter;
+$("#dont-login-btn").addEventListener("click", () => openAuth("login"));
+$("#dont-signup-btn").addEventListener("click", () => openAuth("signup"));
+$("#auth-enter").addEventListener("click", () => { closeLayer("auth-sheet"); startApp(); });
+
+let authMode = "login";
+function openAuth(mode) {
+  authMode = mode;
+  initAudio();
+  $("#auth-title").textContent = C.AUTH.title(mode);
+  $("#auth-blurb").textContent = C.AUTH.blurb;
+  $("#auth-email").placeholder = C.AUTH.email;
+  $("#auth-pass").placeholder = C.AUTH.password;
+  $("#auth-submit").textContent = C.AUTH.submit(mode);
+  openLayer("auth-sheet");
+}
+$("#auth-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const res = authMode === "signup"
+    ? await signup($("#auth-email").value, $("#auth-pass").value)
+    : await login($("#auth-email").value, $("#auth-pass").value);
+  sfx.refuse();
+  vibrate([10, 30, 10]);
+  toast(res.reason || "Refused, obviously.");
+  setTimeout(() => { closeLayer("auth-sheet"); startApp(); }, 950);
+});
+
+/* ───────── Preferences (absurd, mostly inert) ───────── */
+const prefs = { chaos: 2, lookingFor: 0, maxDistance: 0, dealbreakers: new Set() };
+$("#prefs-btn").addEventListener("click", () => { renderPrefs(); openLayer("prefs-sheet"); });
+$("#prefs-note").textContent = C.PREFS.note;
+function renderPrefs() {
+  const P = C.PREFS;
+  const sel = (id, label, opts, cur) =>
+    `<label class="pref"><span>${label}</span><select data-pref="${id}">${
+      opts.map((o, i) => `<option value="${i}" ${i === cur ? "selected" : ""}>${o}</option>`).join("")
+    }</select></label>`;
+  const chaos =
+    `<label class="pref"><span>${P.chaos.label}: <b id="chaos-h">${P.chaos.hint[prefs.chaos]}</b></span>
+     <input type="range" min="0" max="4" step="1" value="${prefs.chaos}" data-pref="chaos"></label>`;
+  const deal =
+    `<div class="pref"><span>${P.dealbreakers.label}</span><div class="chips">${
+      P.dealbreakers.options.map((o) => `<button type="button" class="chip deal ${prefs.dealbreakers.has(o) ? "on" : ""}" data-deal="${o}">${o}</button>`).join("")
+    }</div></div>`;
+  $("#prefs-body").innerHTML =
+    sel("lookingFor", P.lookingFor.label, P.lookingFor.options, prefs.lookingFor) +
+    chaos +
+    sel("maxDistance", P.maxDistance.label, P.maxDistance.options, prefs.maxDistance) +
+    deal;
+}
+$("#prefs-body").addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.dataset.pref === "chaos") {
+    prefs.chaos = +t.value;
+    const h = $("#chaos-h"); if (h) h.textContent = C.PREFS.chaos.hint[prefs.chaos];
+  } else if (t.dataset.pref) {
+    prefs[t.dataset.pref] = +t.value;
+  }
+});
+$("#prefs-body").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-deal]");
+  if (!b) return;
+  const k = b.dataset.deal;
+  prefs.dealbreakers.has(k) ? prefs.dealbreakers.delete(k) : prefs.dealbreakers.add(k);
+  b.classList.toggle("on");
+  sfx.tap();
+});
+
 /* ───────── Feedback helpers ───────── */
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function vibrate(p) { if (reduceMotion) return; try { navigator.vibrate && navigator.vibrate(p); } catch {} }
@@ -60,6 +141,7 @@ function startApp() {
   if (started) return;
   started = true;
   clearInterval(pitchTimer);
+  initAudio();
   $("#landing").hidden = true;
   $("#app").hidden = false;
   sizeConfetti();
@@ -70,8 +152,9 @@ function startApp() {
 
 function nextItem() {
   itemCount++;
-  if (itemCount % 7 === 0) {
-    return { type: "inter", data: C.rotate(C.INTERSTITIALS, Math.floor(itemCount / 7)) };
+  const interval = Math.max(4, 8 - prefs.chaos); // chaos preference = more interstitials
+  if (itemCount % interval === 0) {
+    return { type: "inter", data: C.rotate(C.INTERSTITIALS, Math.floor(itemCount / interval)) };
   }
   return { type: "profile", profile: makeProfile(seed++) };
 }
@@ -162,6 +245,7 @@ function likePrompt(card, prompt) {
   card.__likedPrompt = card.__item.profile.prompts[+prompt.dataset.prompt];
   prompt.classList.add("liked");
   vibrate(8);
+  sfx.tap();
   toast("♥ Liked their answer. Bold. Baseless.");
   setTimeout(() => flingUp(card), 220);
 }
@@ -247,6 +331,7 @@ function flingUp(el) {
 function finishSwipe(el, action) {
   const item = el.__item, likedPrompt = el.__likedPrompt;
   vibrate(action === "nope" ? 10 : 14);
+  sfx[action === "nope" ? "nope" : "like"]();
   setTimeout(() => {
     cards = cards.filter((c) => c !== el);
     history.push({ item, svg: el.__svg });
@@ -291,7 +376,8 @@ function updateStatChip() {
 /* ───────── Idle nudge ───────── */
 let idleTimer = null;
 function anyLayerOpen() {
-  return !$("#match-modal").hidden || !$("#about-sheet").hidden || !$("#chat-sheet").hidden;
+  return ["match-modal", "about-sheet", "chat-sheet", "auth-sheet", "prefs-sheet"]
+    .some((id) => !$("#" + id).hidden);
 }
 function resetIdle() {
   clearTimeout(idleTimer);
@@ -377,6 +463,7 @@ function showMatch(item, likedPrompt) {
   openLayer("match-modal");
   $("#match-message-btn").focus();
   vibrate(legendary ? [20, 40, 60] : [12, 30, 12]);
+  (legendary ? sfx.jackpot : sfx.match)();
   confettiBurst(legendary ? 160 : 90, legendary);
 }
 $("#match-message-btn").addEventListener("click", () => { closeLayer("match-modal"); if (currentMatch) openChat(currentMatch); });
@@ -446,6 +533,7 @@ function toast(msg) {
 }
 function achievement(a) {
   vibrate([15, 40, 15]);
+  sfx.achieve();
   confettiBurst(70, false);
   const el = $("#ach");
   el.innerHTML = `<div class="ach-emoji">${a.emoji}</div><div class="ach-title">${a.title}</div><div class="ach-note">${a.note}</div>`;
@@ -495,7 +583,7 @@ function tick() {
 /* ───────── Keyboard (desktop) ───────── */
 addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    for (const id of ["chat-sheet", "match-modal", "about-sheet"]) {
+    for (const id of ["chat-sheet", "match-modal", "auth-sheet", "prefs-sheet", "about-sheet"]) {
       if (!$("#" + id).hidden) { closeLayer(id); return; }
     }
   }

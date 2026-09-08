@@ -33,6 +33,10 @@
       <h1 class="hero-title" id="hero-title"></h1>
       <p class="hero-sub" id="hero-sub"></p>
       <button class="btn btn-primary btn-cta" id="start-btn"></button>
+      <div class="auth-row">
+        <button class="btn btn-ghost" id="dont-login-btn"></button>
+        <button class="btn btn-ghost" id="dont-signup-btn"></button>
+      </div>
       <p class="fine-print" id="hero-fine"></p>
       <p class="rotating-pitch" id="hero-pitch" aria-live="polite"></p>
     </div>
@@ -53,6 +57,8 @@
       <div class="topbar-right">
         <button class="install-btn" id="install-btn" hidden></button>
         <span class="stat-chip" id="streak-chip" hidden></span>
+        <button class="icon-btn" id="mute-btn" aria-label="Toggle sound">🔊</button>
+        <button class="icon-btn" id="prefs-btn" aria-label="Preferences">⚙︎</button>
         <button class="icon-btn" id="about-btn" aria-label="About Unhinged">?</button>
       </div>
     </header>
@@ -101,6 +107,31 @@
         <span class="cert">✦ no one is watching</span>
       </div>
       <p class="sheet-legal"><a href="terms.html">Terms of Service</a> · the only serious page here, and even it isn't</p>
+    </div>
+  </div>
+
+  <!-- ───────── Parody auth ───────── -->
+  <div class="sheet" id="auth-sheet" hidden>
+    <div class="sheet-card">
+      <button class="sheet-close" data-close="auth-sheet" aria-label="Close">✕</button>
+      <h2 id="auth-title"></h2>
+      <p class="auth-blurb" id="auth-blurb"></p>
+      <form class="auth-form" id="auth-form">
+        <input id="auth-email" type="email" placeholder="" autocomplete="off" />
+        <input id="auth-pass" type="password" placeholder="" autocomplete="off" />
+        <button class="btn btn-primary" id="auth-submit" type="submit"></button>
+      </form>
+      <button class="link-btn" id="auth-enter"></button>
+    </div>
+  </div>
+
+  <!-- ───────── Absurd preferences / filters ───────── -->
+  <div class="sheet" id="prefs-sheet" hidden>
+    <div class="sheet-card">
+      <button class="sheet-close" data-close="prefs-sheet" aria-label="Close">✕</button>
+      <h2>Preferences <span class="legal-sub">(they do about as much as preferences on any dating app)</span></h2>
+      <div id="prefs-body"></div>
+      <p class="prefs-note" id="prefs-note"></p>
     </div>
   </div>
 

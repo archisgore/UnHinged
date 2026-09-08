@@ -301,6 +301,25 @@ button { font-family: inherit; cursor: pointer; }
 /* ───────── Confetti ───────── */
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 65; }
 
+/* ───────── Parody auth ───────── */
+.auth-row { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.auth-row .btn { padding: 11px 18px; font-size: 14px; }
+.auth-blurb { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 0 0 18px; }
+.auth-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.auth-form input { border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; font-size: 15px; font-family: inherit; outline: none; }
+.auth-form input:focus { border-color: var(--pink-2); }
+.auth-form .btn { margin-top: 4px; }
+#auth-enter { display: block; width: 100%; margin-top: 6px; }
+
+/* ───────── Preferences ───────── */
+.pref { display: block; margin: 0 0 18px; }
+.pref > span { display: block; font-size: 14px; font-weight: 700; color: #45403f; margin-bottom: 8px; }
+.pref select { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 15px; font-family: inherit; background: #fff; }
+.pref input[type="range"] { width: 100%; accent-color: var(--pink); }
+.chip.deal { cursor: pointer; }
+.chip.deal.on { background: var(--grad); color: #fff; border-color: transparent; }
+.prefs-note { font-size: 13px; color: var(--muted); font-style: italic; border-top: 1px solid var(--line); padding-top: 14px; }
+
 /* ───────── Legal / Terms page ───────── */
 .legal {
   max-width: 680px; margin: 0 auto;

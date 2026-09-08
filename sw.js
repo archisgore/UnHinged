@@ -21,6 +21,9 @@ const ASSETS = [
   "js/avatar.js",
   "js/random.js",
   "js/copy.js",
+  "js/sfx.js",
+  "js/auth.js",
+  "js/config.js",
 ];
 
 self.addEventListener("install", (e) => {
