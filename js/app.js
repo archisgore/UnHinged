@@ -232,11 +232,14 @@ function renderProfile(p, svg) {
     .join("");
   const artifact = p.artifact ? `<div class="artifact-badge">⚠︎ AI artifact: ${p.artifact}</div>` : "";
   const standout = p.legendary ? `<div class="standout-ribbon">${C.JACKPOT.badge}</div>` : "";
-  // Future: backend profiles may carry a pre-generated photorealistic image.
-  const media = p.image ? `<img class="card-img" src="${p.image}" alt="AI-generated portrait" loading="lazy"/>` : svg;
+  // Show the procedural SVG instantly; if a photorealistic image is available,
+  // layer it on top. If it fails to load, it removes itself → SVG shows through.
+  const photo = svg + (p.image
+    ? `<img class="card-img" src="${p.image}" alt="AI-generated portrait" onerror="this.remove()"/>`
+    : "");
   return `
     <div class="card-photo">
-      ${media}
+      ${photo}
       <div class="photo-fade"></div>
       <div class="cert-badge" title="${CERTIFIED}">✦ 100% fake</div>
       ${artifact}
@@ -484,9 +487,8 @@ function showMatch(item, likedPrompt) {
   const p = item.profile;
   currentMatch = item;
   const legendary = p.legendary;
-  $("#match-face").innerHTML = p.image
-    ? `<img src="${p.image}" alt="" style="width:100%;height:100%;object-fit:cover"/>`
-    : avatarSVG(p.seed, 240);
+  $("#match-face").innerHTML = avatarSVG(p.seed, 240) +
+    (p.image ? `<img class="face-img" src="${p.image}" alt="" onerror="this.remove()"/>` : "");
   $("#match-face").classList.toggle("legendary", !!legendary);
   $("#match-line").textContent = likedPrompt
     ? `They saw you like “${likedPrompt.a}”. It's a match. It means nothing. Enjoy!`

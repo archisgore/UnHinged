@@ -7,6 +7,8 @@ import tempfile
 
 # Use a throwaway DB so tests never touch a real counter file.
 os.environ.setdefault("UNHINGED_DB", os.path.join(tempfile.gettempdir(), "unhinged_test.db"))
+# Keep tests hermetic — no network fetches to the face generator.
+os.environ.setdefault("FACES_ENABLED", "0")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -52,6 +54,12 @@ def test_tally_and_stats_increment() -> None:
     before = client.get("/api/stats").json()["swipes"]
     after = client.post("/api/tally").json()["swipes"]
     assert after == before + 1
+
+
+def test_face_route_404_when_disabled() -> None:
+    # With faces disabled, the route degrades to 404 (frontend uses the SVG).
+    r = client.get("/api/faces/0")
+    assert r.status_code == 404
 
 
 def test_auth_refuses() -> None:

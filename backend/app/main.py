@@ -15,11 +15,12 @@ import random
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from . import content, generator, store
+from . import content, faces, generator, store
 
 ALLOWED_ORIGINS = [
     "https://unhinged.love",
@@ -50,16 +51,38 @@ def health() -> dict[str, Any]:
     return {"status": "ok", "service": "unhinged-api", "pack_size": generator.PACK_SIZE}
 
 
+def _with_face(request: Request, p: dict[str, Any]) -> dict[str, Any]:
+    """Attach a stable, absolute face URL (host-agnostic via the request)."""
+    if not faces.ENABLED:
+        return p
+    return {**p, "image": f"{request.base_url}api/faces/{p['id']}"}
+
+
 @app.get("/api/profiles")
-def profiles(cursor: int = 0, limit: int = 10) -> dict[str, Any]:
+def profiles(request: Request, cursor: int = 0, limit: int = 10) -> dict[str, Any]:
     """A page of cached profiles; wraps around for an endless deck."""
-    return generator.page(cursor, limit)
+    data = generator.page(cursor, limit)
+    return {**data, "profiles": [_with_face(request, p) for p in data["profiles"]]}
 
 
 @app.get("/api/profiles/{pid}")
-def profile(pid: str) -> dict[str, Any]:
+def profile(request: Request, pid: str) -> dict[str, Any]:
     p = generator.by_id(pid)
-    return p if p else {"error": "not found"}
+    return _with_face(request, p) if p else {"error": "not found"}
+
+
+@app.get("/api/faces/{fid}")
+def face(fid: str) -> Response:
+    """Serve the cached photorealistic face for a profile (fetched on first use).
+    404 → the frontend falls back to its procedural SVG avatar."""
+    path = faces.get(fid)
+    if not path:
+        return Response(status_code=404)
+    return FileResponse(
+        path,
+        media_type="image/jpeg",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 @app.get("/api/copy")
