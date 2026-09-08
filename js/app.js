@@ -375,6 +375,7 @@ function showMatch(item, likedPrompt) {
     : p.matchLine;
   $("#match-foot").textContent = legendary ? C.JACKPOT.matchNote : "*neither of you is real, so this is legally meaningless.";
   openLayer("match-modal");
+  $("#match-message-btn").focus();
   vibrate(legendary ? [20, 40, 60] : [12, 30, 12]);
   confettiBurst(legendary ? 160 : 90, legendary);
 }
@@ -491,7 +492,12 @@ function tick() {
 
 /* ───────── Keyboard (desktop) ───────── */
 addEventListener("keydown", (e) => {
-  if (!started || !topCard()) return;
+  if (e.key === "Escape") {
+    for (const id of ["chat-sheet", "match-modal", "about-sheet"]) {
+      if (!$("#" + id).hidden) { closeLayer(id); return; }
+    }
+  }
+  if (!started || !topCard() || anyLayerOpen()) return;
   if (e.key === "ArrowLeft") fling(topCard(), "nope");
   else if (e.key === "ArrowRight") fling(topCard(), "like");
   else if (e.key === "ArrowUp") flingUp(topCard());
