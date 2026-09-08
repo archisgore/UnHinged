@@ -1,0 +1,29 @@
+name: warm-faces
+
+# The growing corpus: every few hours, bank the next chunk of photorealistic
+# faces onto the volume so there's always fresh, ready content — accumulating
+# over time toward effectively infinite. Token-gated (repo secret).
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+    inputs:
+      chunk:
+        description: "How many faces to bank this run"
+        default: "60"
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bank the next chunk of faces
+        run: |
+          CHUNK="${{ github.event.inputs.chunk || '60' }}"
+          echo "Warming $CHUNK faces…"
+          curl -sS -X POST "https://api.unhinged.love/api/admin/warm?chunk=$CHUNK" \
+            -H "x-admin-token: ${{ secrets.UNHINGED_ADMIN_TOKEN }}" \
+            --max-time 300
+          echo
+          echo "Corpus now:"
+          curl -sS "https://api.unhinged.love/api/corpus"

@@ -1,20 +1,18 @@
-"""Server-side profile factory + in-memory cache.
+"""Server-side profile factory.
 
-Profiles are generated once into a fixed pack at import time and served from
-memory — so browsers fetch instead of regenerating, the deck is consistent for
-everyone, and each profile carries an `image` slot for future pre-generated
-photorealistic AI images (see docs/VISION.md).
+Profiles are unbounded: any integer id maps to a deterministic profile, so the
+deck is genuinely infinite. Generation is memoized (pure perf), and each profile
+carries a photorealistic `image` URL (see faces.py / docs/VISION.md).
 """
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import random
 from typing import Any
 
 from . import content
-
-PACK_SIZE = 500  # size of the cached, canonical deck
 
 
 def _rng(seed: str) -> random.Random:
@@ -53,36 +51,24 @@ def make_profile(i: int, salt: int = 0) -> dict[str, Any]:
     }
 
 
-def _build_pack() -> list[dict[str, Any]]:
-    """Generate the pack once, re-rolling so no two *adjacent* profiles share a
-    name (otherwise a run of the same name looks like a bug in the deck)."""
-    pack: list[dict[str, Any]] = []
-    prev_name: str | None = None
-    for i in range(PACK_SIZE):
-        p = make_profile(i)
-        salt = 0
-        while p["name"] == prev_name and salt < 6:
-            salt += 1
-            p = make_profile(i, salt)
-        prev_name = p["name"]
-        pack.append(p)
-    return pack
-
-
-# Generated once, cached for the process lifetime.
-_PACK: list[dict[str, Any]] = _build_pack()
+# Profiles are unbounded: any id maps to a deterministic profile, so the deck is
+# genuinely infinite. lru_cache is a pure perf memo (same id → same profile),
+# never a cap on how many distinct profiles exist.
+@functools.lru_cache(maxsize=20000)
+def _cached(i: int) -> dict[str, Any]:
+    return make_profile(i)
 
 
 def page(cursor: int, limit: int) -> dict[str, Any]:
-    """Return `limit` profiles starting at `cursor`, wrapping for an endless deck."""
+    """Return `limit` profiles starting at `cursor`. Unbounded — cursor grows forever."""
     limit = max(1, min(limit, 50))
     cursor = max(0, cursor)
-    profiles = [_PACK[(cursor + k) % PACK_SIZE] for k in range(limit)]
-    return {"profiles": profiles, "next_cursor": cursor + limit, "pack_size": PACK_SIZE}
+    profiles = [_cached(cursor + k) for k in range(limit)]
+    return {"profiles": profiles, "next_cursor": cursor + limit}
 
 
 def by_id(pid: str) -> dict[str, Any] | None:
     try:
-        return _PACK[int(pid) % PACK_SIZE]
-    except (ValueError, IndexError):
+        return _cached(max(0, int(pid)))
+    except ValueError:
         return None

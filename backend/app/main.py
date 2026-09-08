@@ -11,6 +11,7 @@ Deliberately account-free: /auth/* endpoints refuse, mirroring the client's
 
 from __future__ import annotations
 
+import os
 import random
 from contextlib import asynccontextmanager
 from typing import Any
@@ -21,6 +22,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from . import content, faces, generator, store
+
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN")
 
 ALLOWED_ORIGINS = [
     "https://unhinged.love",
@@ -48,7 +51,21 @@ app.add_middleware(
 
 @app.get("/api/health")
 def health() -> dict[str, Any]:
-    return {"status": "ok", "service": "unhinged-api", "pack_size": generator.PACK_SIZE}
+    return {"status": "ok", "service": "unhinged-api", "profiles": "unbounded", **faces.corpus_stats()}
+
+
+@app.get("/api/corpus")
+def corpus() -> dict[str, Any]:
+    """Public stats on the growing face corpus."""
+    return faces.corpus_stats()
+
+
+@app.post("/api/admin/warm")
+def admin_warm(request: Request, chunk: int = 40) -> Any:
+    """Bank the next chunk of faces (scheduled). Token-gated."""
+    if not ADMIN_TOKEN or request.headers.get("x-admin-token") != ADMIN_TOKEN:
+        return Response(status_code=401)
+    return faces.warm(max(1, min(chunk, 200)))
 
 
 def _with_face(request: Request, p: dict[str, Any]) -> dict[str, Any]:

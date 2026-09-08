@@ -15,7 +15,9 @@ from __future__ import annotations
 import io
 import os
 import threading
+import time
 import urllib.request
+from typing import Any
 
 from PIL import Image
 
@@ -70,3 +72,53 @@ def get(fid: str) -> str | None:
             return p
         except Exception:
             return None
+
+
+# ── The growing corpus ────────────────────────────────────────────────────
+# A scheduled job (see .github/workflows/warm.yml) calls warm() periodically to
+# bank the next chunk of faces onto the volume, so the ready corpus keeps
+# growing over time toward "always fresh, effectively infinite".
+
+_FRONTIER = os.path.join(FACES_DIR, ".frontier")
+
+
+def _read_frontier() -> int:
+    try:
+        with open(_FRONTIER) as f:
+            return int(f.read().strip() or "0")
+    except (OSError, ValueError):
+        return 0
+
+
+def _write_frontier(n: int) -> None:
+    try:
+        os.makedirs(FACES_DIR, exist_ok=True)
+        with open(_FRONTIER, "w") as f:
+            f.write(str(n))
+    except OSError:
+        pass
+
+
+def count_cached() -> int:
+    try:
+        return sum(1 for f in os.listdir(FACES_DIR) if f.endswith(".jpg"))
+    except OSError:
+        return 0
+
+
+def corpus_stats() -> dict[str, Any]:
+    return {"cached_faces": count_cached(), "frontier": _read_frontier(), "faces_enabled": ENABLED}
+
+
+def warm(chunk: int = 40) -> dict[str, Any]:
+    """Pre-fetch the next `chunk` faces onto the volume. Gentle on the source."""
+    if not ENABLED:
+        return {"enabled": False}
+    start = _read_frontier()
+    warmed = 0
+    for i in range(start, start + chunk):
+        if get(str(i)):
+            warmed += 1
+        time.sleep(0.3)  # be polite to the face source
+    _write_frontier(start + chunk)
+    return {"warmed": warmed, "frontier": start + chunk, "cached_faces": count_cached()}
