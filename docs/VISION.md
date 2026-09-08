@@ -14,10 +14,15 @@ Two concrete jobs (see [`backend/`](../backend/) for the first cut):
 
 1. **Serve & cache profiles.** Stop regenerating profiles in every browser.
    Pregenerate an unhinged profile pack server-side, cache it, and serve it so
-   the deck is consistent across visitors and cheap to load. The profile shape
-   already carries an `image` field so we can later attach **pre-generated,
-   cached, higher-quality photorealistic AI images** (generated once, served to
-   all — never per-browser, never per-user).
+   the deck is consistent across visitors and cheap to load.
+
+   **Photorealistic AI faces — SHIPPED.** `backend/app/faces.py` lazily fetches a
+   StyleGAN face (thispersondoesnotexist.com — people who don't exist, exactly the
+   pitch) per profile, downscales/recompresses (~500KB→~50KB), caches it on the
+   /data volume, and serves it via `GET /api/faces/{id}` (immutable cache).
+   `/api/profiles` returns a stable https image URL per profile; the frontend
+   layers the photo over the procedural SVG (instant fallback, graceful on error).
+   Swap `FACE_SOURCE` for a keyed image model later for more control.
 2. **A place for aggregate, non-personal counters** (e.g. "N billion holograms
    judged") — anonymous, no identity, matching the ToS.
 
