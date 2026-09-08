@@ -340,22 +340,21 @@ function makeDraggable(el) {
   el.addEventListener("pointercancel", up);
 }
 
-function fling(el, action) {
+// Animate a card off-screen, then resolve the swipe. `transform` is the exit pose.
+function flingOut(el, transform, action) {
   if (el.classList.contains("flinging")) return;
-  const dir = action === "nope" ? -1 : 1;
   el.classList.add("flinging");
   el.style.transition = "transform .4s ease, opacity .4s ease";
-  el.style.transform = `translate(${dir * (window.innerWidth + 200)}px, ${dir * 40}px) rotate(${dir * 22}deg)`;
+  el.style.transform = transform;
   el.style.opacity = "0";
   finishSwipe(el, action);
 }
+function fling(el, action) {
+  const dir = action === "nope" ? -1 : 1;
+  flingOut(el, `translate(${dir * (window.innerWidth + 200)}px, ${dir * 40}px) rotate(${dir * 22}deg)`, action);
+}
 function flingUp(el) {
-  if (el.classList.contains("flinging")) return;
-  el.classList.add("flinging");
-  el.style.transition = "transform .4s ease, opacity .4s ease";
-  el.style.transform = `translateY(${-(window.innerHeight + 200)}px) rotate(-8deg)`;
-  el.style.opacity = "0";
-  finishSwipe(el, "super");
+  flingOut(el, `translateY(${-(window.innerHeight + 200)}px) rotate(-8deg)`, "super");
 }
 function finishSwipe(el, action) {
   const item = el.__item, likedPrompt = el.__likedPrompt;
@@ -405,9 +404,10 @@ function updateStatChip() {
 
 /* ───────── Idle nudge ───────── */
 let idleTimer = null;
+// All dismissable overlays, in Escape close-priority order (topmost first).
+const LAYER_IDS = ["chat-sheet", "match-modal", "auth-sheet", "prefs-sheet", "about-sheet"];
 function anyLayerOpen() {
-  return ["match-modal", "about-sheet", "chat-sheet", "auth-sheet", "prefs-sheet"]
-    .some((id) => !$("#" + id).hidden);
+  return LAYER_IDS.some((id) => !$("#" + id).hidden);
 }
 function resetIdle() {
   clearTimeout(idleTimer);
@@ -615,7 +615,7 @@ function tick() {
 /* ───────── Keyboard (desktop) ───────── */
 addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    for (const id of ["chat-sheet", "match-modal", "auth-sheet", "prefs-sheet", "about-sheet"]) {
+    for (const id of LAYER_IDS) {
       if (!$("#" + id).hidden) { closeLayer(id); return; }
     }
   }
