@@ -20,7 +20,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Browser smoke test — gates the deploy. Catches app-breaking regressions
+  # (e.g. an overlay that eats all clicks) that syntax checks can't.
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Playwright (chromium)
+        working-directory: test
+        run: npm install && npx playwright install --with-deps chromium
+      - name: Serve site and run smoke test
+        run: |
+          python3 -m http.server 8000 &
+          SERVER=$!
+          sleep 2
+          BASE=http://localhost:8000 node test/smoke.mjs
+          kill $SERVER
+
   deploy:
+    needs: smoke
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -1,0 +1,9 @@
+{
+  "name": "unhinged-smoke",
+  "private": true,
+  "type": "module",
+  "description": "Playwright browser smoke test that gates deploys.",
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
