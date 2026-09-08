@@ -149,4 +149,25 @@ export const SHARE = {
   copied: "Link copied. Spread the slop.",
 };
 
+// Idle nudges — fire if you stop swiping for a bit. The void gets lonely.
+export const IDLE_NUDGES = [
+  "still there? ∞ fake singles are still not waiting for you.",
+  "the deck doesn't run out. your thumb might. keep going.",
+  "psst. the next one could be a Certified Standout. (it's random. that's the point.)",
+  "you paused. a hologram noticed. it's fine. it forgot already.",
+];
+
+// Tab-away bait — classic attention grab, aimed squarely at itself.
+export const TITLE_BAIT = [
+  "💘 someone fake liked you!",
+  "👀 3 imaginary people are typing…",
+  "🔥 your streak misses you",
+  "don't go — the void is lonely",
+];
+
+export const INSTALL = {
+  cta: "＋ Add to home screen",
+  toast: "Installed-ish. Now it lives on your home screen, judging quietly.",
+};
+
 export const rotate = (arr, i) => arr[i % arr.length];

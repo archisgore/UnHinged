@@ -212,6 +212,12 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 999px; padding: 6px 11px; white-space: nowrap;
 }
 .stat-chip b { color: var(--pink); }
+.stat-chip.hot { background: linear-gradient(90deg,#fff1e6,#ffe0e8); border-color: #ffd0c2; }
+.install-btn {
+  font-size: 12px; font-weight: 700; color: #fff; background: var(--grad);
+  border: none; border-radius: 999px; padding: 7px 12px; white-space: nowrap;
+  box-shadow: 0 6px 14px -6px rgba(255,61,110,.6);
+}
 
 /* ───────── Compatibility + standout ───────── */
 .compat {

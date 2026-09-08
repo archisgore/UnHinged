@@ -40,7 +40,8 @@ function openLayer(id) { $("#" + id).hidden = false; }
 function closeLayer(id) { $("#" + id).hidden = true; }
 
 /* ───────── Feedback helpers ───────── */
-function vibrate(p) { try { navigator.vibrate && navigator.vibrate(p); } catch {} }
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function vibrate(p) { if (reduceMotion) return; try { navigator.vibrate && navigator.vibrate(p); } catch {} }
 
 /* ───────── Deck ───────── */
 const deck = $("#deck");
@@ -64,6 +65,7 @@ function startApp() {
   sizeConfetti();
   for (let i = 0; i < KEEP; i++) addCard();
   layout();
+  resetIdle();
 }
 
 function nextItem() {
@@ -156,18 +158,26 @@ function renderInterstitial(d) {
 }
 
 /* ───────── Tap interactions (delegated) ───────── */
+function likePrompt(card, prompt) {
+  card.__likedPrompt = card.__item.profile.prompts[+prompt.dataset.prompt];
+  prompt.classList.add("liked");
+  vibrate(8);
+  toast("♥ Liked their answer. Bold. Baseless.");
+  setTimeout(() => flingUp(card), 220);
+}
 deck.addEventListener("click", (e) => {
-  const card = topCard();
-  if (!card || card.__moved) { if (card) card.__moved = false; return; }
+  const card = e.target.closest(".card");
+  if (!card || card !== topCard() || card.classList.contains("flinging")) return;
+  if (card.__moved) { card.__moved = false; return; } // was a drag, not a tap
   if (e.target.closest("[data-share]")) { e.stopPropagation(); shareProfile(card.__item); return; }
   const prompt = e.target.closest(".prompt");
-  if (prompt && card.__item.type === "profile") {
-    card.__likedPrompt = card.__item.profile.prompts[+prompt.dataset.prompt];
-    prompt.classList.add("liked");
-    vibrate(8);
-    toast("♥ Liked their answer. Bold. Baseless.");
-    setTimeout(() => flingUp(card), 220);
-  }
+  if (prompt && card.__item.type === "profile") likePrompt(card, prompt);
+});
+deck.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const prompt = e.target.closest(".prompt");
+  const card = topCard();
+  if (prompt && card && card.__item.type === "profile") { e.preventDefault(); likePrompt(card, prompt); }
 });
 
 /* ───────── Swipe / drag ───────── */
@@ -252,6 +262,8 @@ function finishSwipe(el, action) {
 /* ───────── Engagement: streaks + achievements ───────── */
 function recordSwipe() {
   swipes++;
+  hideHint();
+  resetIdle();
   const now = Date.now();
   streak = now - lastSwipeTs < 6000 ? streak + 1 : 1;
   lastSwipeTs = now;
@@ -270,10 +282,49 @@ function recordSwipe() {
 function updateStatChip() {
   const chip = $("#streak-chip");
   chip.hidden = swipes === 0;
+  chip.classList.toggle("hot", streak >= 5);
   chip.innerHTML = streak >= 3
     ? `<b>🔥 ${streak}</b> streak`
     : `<b>${swipes}</b> judged`;
 }
+
+/* ───────── Idle nudge ───────── */
+let idleTimer = null;
+function anyLayerOpen() {
+  return !$("#match-modal").hidden || !$("#about-sheet").hidden || !$("#chat-sheet").hidden;
+}
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (started && !anyLayerOpen()) toast(pick(C.IDLE_NUDGES));
+    resetIdle();
+  }, 22000);
+}
+
+/* ───────── Tab-away title bait ───────── */
+const realTitle = document.title;
+document.addEventListener("visibilitychange", () => {
+  if (!started) return;
+  document.title = document.hidden ? pick(C.TITLE_BAIT) : realTitle;
+});
+
+/* ───────── PWA install nudge ───────── */
+let deferredInstall = null;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstall = e;
+  const btn = $("#install-btn");
+  btn.textContent = C.INSTALL.cta;
+  btn.hidden = false;
+});
+$("#install-btn").addEventListener("click", async () => {
+  $("#install-btn").hidden = true;
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  try { await deferredInstall.userChoice; } catch {}
+  deferredInstall = null;
+  toast(C.INSTALL.toast);
+});
 
 /* ───────── Reactions ───────── */
 function reactTo(action, item, likedPrompt) {
@@ -416,6 +467,7 @@ function sizeConfetti() {
 }
 addEventListener("resize", () => { sizeConfetti(); });
 function confettiBurst(n, gold) {
+  if (reduceMotion) return;
   const colors = gold ? ["#FFD15C", "#FF3D6E", "#FF6B8A", "#fff"] : ["#FF3D6E", "#FF6B8A", "#4a9bff", "#17c964", "#FFD15C"];
   const cx = innerWidth / 2, cy = innerHeight * 0.4;
   for (let i = 0; i < n; i++) {
