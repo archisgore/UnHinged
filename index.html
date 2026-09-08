@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Unhinged — the dating app that's 100% certified fake</title>
+  <meta name="description" content="A parody dating app. Every profile and photo is 100% certified AI-generated fake. No account, no tracking, no one is real. Doomswipe freely — worst case you don't find love, best case you're entertained." />
+
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Unhinged" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <!-- Open Graph / social -->
+  <meta property="og:title" content="Unhinged — 100% certified fake dating" />
+  <meta property="og:description" content="Every profile is AI slop and proud. No account, no tracking, no one is real. Swipe for the bit." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://unhinged.love" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ───────── Landing / intro ───────── -->
+  <section id="landing" class="landing">
+    <div class="landing-inner">
+      <img class="hero-logo" src="assets/logo.svg" alt="Unhinged" width="112" height="112" />
+      <p class="kicker" id="hero-kicker"></p>
+      <h1 class="hero-title" id="hero-title"></h1>
+      <p class="hero-sub" id="hero-sub"></p>
+      <button class="btn btn-primary btn-cta" id="start-btn"></button>
+      <p class="fine-print" id="hero-fine"></p>
+      <p class="rotating-pitch" id="hero-pitch" aria-live="polite"></p>
+    </div>
+    <div class="badge-strip">
+      <span class="cert">✦ 100% AI-generated</span>
+      <span class="cert">✦ 0% tracking</span>
+      <span class="cert">✦ 0 accounts</span>
+    </div>
+  </section>
+
+  <!-- ───────── App ───────── -->
+  <main id="app" class="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/mark.svg" alt="" width="30" height="30" />
+        <span class="wordmark">unhinged<span class="tld">.love</span></span>
+      </div>
+      <button class="icon-btn" id="about-btn" aria-label="About Unhinged">?</button>
+    </header>
+
+    <div class="deck-wrap">
+      <div class="deck" id="deck" aria-live="polite"></div>
+      <div class="swipe-hint" id="swipe-hint">drag a card, or use the buttons ↓</div>
+    </div>
+
+    <nav class="actions" aria-label="Swipe actions">
+      <button class="act act-rewind" data-action="rewind" aria-label="Rewind">↺</button>
+      <button class="act act-nope" data-action="nope" aria-label="Nope">✕</button>
+      <button class="act act-super" data-action="super" aria-label="Super Unhinged">★</button>
+      <button class="act act-like" data-action="like" aria-label="Like">♥</button>
+      <button class="act act-boost" data-action="boost" aria-label="Boost">⚡</button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <!-- ───────── Match modal ───────── -->
+  <div class="modal" id="match-modal" hidden>
+    <div class="modal-card">
+      <div class="match-burst">It's a match!<span>*</span></div>
+      <div class="match-face" id="match-face"></div>
+      <p class="match-line" id="match-line"></p>
+      <p class="match-footnote">*neither of you is real, so this is legally meaningless.</p>
+      <button class="btn btn-primary" data-close="match-modal">Keep swiping into the void</button>
+    </div>
+  </div>
+
+  <!-- ───────── About sheet ───────── -->
+  <div class="sheet" id="about-sheet" hidden>
+    <div class="sheet-card">
+      <button class="sheet-close" data-close="about-sheet" aria-label="Close">✕</button>
+      <h2 id="about-title"></h2>
+      <div id="about-body"></div>
+      <p class="about-footer" id="about-footer"></p>
+      <div class="badge-strip badge-strip--sheet">
+        <span class="cert">✦ no database</span>
+        <span class="cert">✦ no algorithm</span>
+        <span class="cert">✦ no one is watching</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
