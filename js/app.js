@@ -3,7 +3,7 @@ import { avatarSVG } from "./avatar.js";
 import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
-import { fetchProfiles, fetchCopy, tally, fetchStats } from "./net.js";
+import { fetchProfiles, fetchCopy, tally, fetchStats, fetchCorpus } from "./net.js";
 import "./analytics.js";
 
 const $ = (sel) => document.querySelector(sel);
@@ -169,6 +169,10 @@ function startApp() {
 // Optional buffer of backend-served profiles (flag-gated; empty otherwise).
 const remoteBuf = [];
 let remoteCursor = Math.floor(Math.random() * 500); // random start → sessions see different slices
+// Prefer starting within the pre-warmed range so first photos are instant.
+fetchCorpus().then((c) => {
+  if (c && c.frontier > 0) remoteCursor = Math.floor(Math.random() * c.frontier);
+});
 async function refillRemote() {
   if (remoteBuf.length >= 6) return;
   const pg = await fetchProfiles(remoteCursor, 20); // null unless FEATURES.remoteProfiles

@@ -39,3 +39,12 @@ export async function fetchStats() {
     return r.ok ? await r.json() : null;
   } catch { return null; }
 }
+
+// Growing-corpus stats (cached_faces, frontier) — lets the deck start on
+// pre-warmed (instant) photos rather than cold-generated ones.
+export async function fetchCorpus() {
+  try {
+    const r = await fetch(`${API}/corpus`);
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}

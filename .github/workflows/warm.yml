@@ -11,7 +11,7 @@ on:
     inputs:
       chunk:
         description: "How many faces to bank this run"
-        default: "60"
+        default: "40"
 
 jobs:
   warm:
@@ -19,11 +19,11 @@ jobs:
     steps:
       - name: Bank the next chunk of faces
         run: |
-          CHUNK="${{ github.event.inputs.chunk || '60' }}"
-          echo "Warming $CHUNK faces…"
+          CHUNK="${{ github.event.inputs.chunk || '40' }}"
+          echo "Kicking off background warm of $CHUNK faces…"
           curl -sS -X POST "https://api.unhinged.love/api/admin/warm?chunk=$CHUNK" \
             -H "x-admin-token: ${{ secrets.UNHINGED_ADMIN_TOKEN }}" \
-            --max-time 300
+            --max-time 60
           echo
-          echo "Corpus now:"
+          echo "Corpus (warm runs in the background; grows over the next few minutes):"
           curl -sS "https://api.unhinged.love/api/corpus"

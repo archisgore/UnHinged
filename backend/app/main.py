@@ -65,7 +65,7 @@ def admin_warm(request: Request, chunk: int = 40) -> Any:
     """Bank the next chunk of faces (scheduled). Token-gated."""
     if not ADMIN_TOKEN or request.headers.get("x-admin-token") != ADMIN_TOKEN:
         return Response(status_code=401)
-    return faces.warm(max(1, min(chunk, 200)))
+    return faces.warm_async(max(1, min(chunk, 200)))
 
 
 def _with_face(request: Request, p: dict[str, Any]) -> dict[str, Any]:
