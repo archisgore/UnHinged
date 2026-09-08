@@ -20,13 +20,15 @@ Two concrete jobs (see [`backend/`](../backend/) for the first cut):
    feed is combinatorial (near-infinite). So the ready content keeps growing over
    time toward effectively infinite — "always fresh".
 
-   **Photorealistic AI faces — SHIPPED.** `backend/app/faces.py` lazily fetches a
-   StyleGAN face (thispersondoesnotexist.com — people who don't exist, exactly the
-   pitch) per profile, downscales/recompresses (~500KB→~50KB), caches it on the
-   /data volume, and serves it via `GET /api/faces/{id}` (immutable cache).
-   `/api/profiles` returns a stable https image URL per profile; the frontend
-   layers the photo over the procedural SVG (instant fallback, graceful on error).
-   Swap `FACE_SOURCE` for a keyed image model later for more control.
+   **AI cliché photos — SHIPPED.** `backend/app/faces.py` generates a wholesome-
+   absurd dating-app CLICHÉ per profile (~30 researched SFW tropes: man holding a
+   fish, sedated-tiger tourist shot, Santorini rooftop, gym mirror selfie, summit
+   pose, guitar guy, camel, flower crown, "not my sports car", …) via a key-less
+   text-to-image model (Pollinations, `flux`), caches it on the /data volume
+   (style-versioned dir), and serves `GET /api/faces/{id}` (immutable cache).
+   `/api/profiles` returns a stable https image URL; the frontend layers the photo
+   over the SVG (instant fallback). Generation is slow/variable (service queue),
+   so warming is background + the deck starts in the pre-warmed frontier.
 2. **A place for aggregate, non-personal counters** (e.g. "N billion holograms
    judged") — anonymous, no identity, matching the ToS.
 
