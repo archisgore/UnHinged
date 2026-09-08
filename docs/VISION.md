@@ -21,11 +21,24 @@ Two concrete jobs (see [`backend/`](../backend/) for the first cut):
 2. **A place for aggregate, non-personal counters** (e.g. "N billion holograms
    judged") — anonymous, no identity, matching the ToS.
 
-## 2. The Unhinged Feed (future)
+## 2. The Unhinged Feed — v1 SHIPPED
 
-A scrolling feed, Facebook-shaped but in spirit closer to **FML (Fuck My Life)**
-and **The Onion** — short, funny, fake dispatches. Explore possible
-**partnerships with FML and/or The Onion** for content. Nothing to build now.
+A scrolling feed (`feed.html` + `js/feed.js`), in the spirit of **FML (Fuck My
+Life)** and **The Onion** — short, funny, fake dispatches, procedurally generated
+on-device with infinite scroll. **No user submissions**, so there's no
+moderation/safety surface. Linked from the landing and the About sheet.
+
+Future: richer/rotating content (backend-served), and explore possible
+**partnerships with FML and/or The Onion**.
+
+## 2b. User management — Clerk (future, like WineTone)
+
+When real accounts are eventually wanted, use **Clerk** for user management,
+mirroring WineTone's setup. The seam already exists: `js/auth.js` +
+`js/config.js` (`FEATURES.accounts`, currently false) and refusing `/api/auth/*`
+endpoints. Note this coexists with the "no PII" ethos only if accounts stay
+strictly optional and off by default — the current product is deliberately
+account-free ("Don't Login" / "Don't Signup").
 
 ## 3. In-person connection — the no-PII common pool (future)
 
