@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unhinged logo">
+  <defs>
+    <linearGradient id="heart" x1="150" y1="120" x2="380" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF6B8A"/>
+      <stop offset="1" stop-color="#FF3D6E"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#FF3D6E" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- white rounded app background -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#FFFFFF"/>
+  <rect x="16.5" y="16.5" width="479" height="479" rx="111.5" stroke="#F1E9EC" stroke-width="1"/>
+
+  <!-- hinge plate on the left: two knuckles + pin -->
+  <g stroke="#C9C2C6" stroke-width="10" stroke-linecap="round">
+    <line x1="150" y1="150" x2="150" y2="372"/>
+  </g>
+  <g fill="#E7E1E4" stroke="#C9C2C6" stroke-width="6">
+    <rect x="128" y="150" width="44" height="70" rx="18"/>
+    <rect x="128" y="300" width="44" height="70" rx="18"/>
+  </g>
+  <circle cx="150" cy="261" r="12" fill="#B8B0B4"/>
+
+  <!-- the heart, hanging crooked off the hinge (unhinged) -->
+  <g transform="rotate(13 300 300)" filter="url(#soft)">
+    <path d="M300 392 C300 392 168 300 168 214 C168 175 199 149 234 149
+             C266 149 288 170 300 192 C312 170 334 149 366 149
+             C401 149 432 175 432 214 C432 300 300 392 300 392 Z"
+          fill="url(#heart)"/>
+    <!-- little glossy highlight -->
+    <path d="M232 188 C214 196 205 214 208 233" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="12" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- one popped screw + its motion arc: the "fidget spinner" wink -->
+  <path d="M150 261 C205 250 250 250 300 292" stroke="#D8D2D5" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 18" fill="none"/>
+  <g transform="translate(392 150)">
+    <circle r="22" fill="#FFD15C" stroke="#E8B94A" stroke-width="5"/>
+    <line x1="-11" y1="0" x2="11" y2="0" stroke="#B9922E" stroke-width="6" stroke-linecap="round" transform="rotate(35)"/>
+  </g>
+</svg>
