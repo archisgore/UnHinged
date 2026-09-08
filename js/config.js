@@ -19,6 +19,6 @@ export const FEATURES = {
 // Privacy-friendly analytics. Cookieless, aggregate-only, no PII — matching the
 // ToS. OFF until you set one of these (see js/analytics.js for how to get it).
 export const ANALYTICS = {
-  cloudflareToken: null, // Cloudflare Web Analytics beacon token (recommended)
+  cloudflareToken: "37dc842fd7a54aeab16f13622241bd83", // Cloudflare Web Analytics (cookieless, public beacon token)
   plausibleDomain: null, // alternative: e.g. "unhinged.love"
 };
