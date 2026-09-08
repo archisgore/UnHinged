@@ -24,6 +24,7 @@ const ASSETS = [
   "js/sfx.js",
   "js/auth.js",
   "js/config.js",
+  "js/net.js",
 ];
 
 self.addEventListener("install", (e) => {

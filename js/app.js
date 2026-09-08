@@ -3,6 +3,7 @@ import { avatarSVG } from "./avatar.js";
 import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
+import { fetchProfiles, fetchCopy, tally } from "./net.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -14,16 +15,19 @@ $("#start-btn").textContent = C.HERO.cta;
 $("#hero-fine").textContent = C.HERO.finePrint;
 
 let pitchI = 0;
+let pitches = C.PITCHES;
 const pitchEl = $("#hero-pitch");
 const showPitch = () => {
   pitchEl.style.opacity = "0";
   setTimeout(() => {
-    pitchEl.textContent = "“" + C.rotate(C.PITCHES, pitchI++) + "”";
+    pitchEl.textContent = "“" + C.rotate(pitches, pitchI++) + "”";
     pitchEl.style.opacity = ".82";
   }, 300);
 };
 showPitch();
 const pitchTimer = setInterval(showPitch, 4200);
+// Optionally refresh punchlines from the backend (falls back to bundled).
+fetchCopy().then((c) => { if (c && Array.isArray(c.pitches) && c.pitches.length) pitches = c.pitches; });
 $("#start-btn").addEventListener("click", startApp);
 
 /* ───────── About sheet ───────── */
@@ -150,13 +154,25 @@ function startApp() {
   resetIdle();
 }
 
+// Optional buffer of backend-served profiles (flag-gated; empty otherwise).
+const remoteBuf = [];
+let remoteCursor = 0;
+async function refillRemote() {
+  if (remoteBuf.length >= 6) return;
+  const pg = await fetchProfiles(remoteCursor, 20); // null unless FEATURES.remoteProfiles
+  if (pg && pg.profiles) { remoteBuf.push(...pg.profiles); remoteCursor = pg.next_cursor; }
+}
+
 function nextItem() {
   itemCount++;
   const interval = Math.max(4, 8 - prefs.chaos); // chaos preference = more interstitials
   if (itemCount % interval === 0) {
     return { type: "inter", data: C.rotate(C.INTERSTITIALS, Math.floor(itemCount / interval)) };
   }
-  return { type: "profile", profile: makeProfile(seed++) };
+  // Prefer a cached backend profile if available; always fall back on-device.
+  refillRemote();
+  const profile = remoteBuf.length ? remoteBuf.shift() : makeProfile(seed++);
+  return { type: "profile", profile };
 }
 
 function addCard(item = nextItem()) {
@@ -205,9 +221,11 @@ function renderProfile(p, svg) {
     .join("");
   const artifact = p.artifact ? `<div class="artifact-badge">⚠︎ AI artifact: ${p.artifact}</div>` : "";
   const standout = p.legendary ? `<div class="standout-ribbon">${C.JACKPOT.badge}</div>` : "";
+  // Future: backend profiles may carry a pre-generated photorealistic image.
+  const media = p.image ? `<img class="card-img" src="${p.image}" alt="AI-generated portrait" loading="lazy"/>` : svg;
   return `
     <div class="card-photo">
-      ${svg}
+      ${media}
       <div class="photo-fade"></div>
       <div class="cert-badge" title="${CERTIFIED}">✦ 100% fake</div>
       ${artifact}
@@ -347,6 +365,7 @@ function finishSwipe(el, action) {
 /* ───────── Engagement: streaks + achievements ───────── */
 function recordSwipe() {
   swipes++;
+  tally(); // anonymous aggregate ping (no-op unless FEATURES.tally)
   hideHint();
   resetIdle();
   const now = Date.now();
@@ -454,7 +473,9 @@ function showMatch(item, likedPrompt) {
   const p = item.profile;
   currentMatch = item;
   const legendary = p.legendary;
-  $("#match-face").innerHTML = avatarSVG(p.seed, 240);
+  $("#match-face").innerHTML = p.image
+    ? `<img src="${p.image}" alt="" style="width:100%;height:100%;object-fit:cover"/>`
+    : avatarSVG(p.seed, 240);
   $("#match-face").classList.toggle("legendary", !!legendary);
   $("#match-line").textContent = likedPrompt
     ? `They saw you like “${likedPrompt.a}”. It's a match. It means nothing. Enjoy!`
