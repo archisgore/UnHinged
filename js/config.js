@@ -11,7 +11,7 @@ export const API = local ? "http://localhost:8000/api" : "https://api.unhinged.l
 
 export const FEATURES = {
   accounts: false,       // there are no accounts; the buttons refuse, on purpose
-  remoteProfiles: false, // fetch cached profiles from the backend (falls back to on-device generation)
-  remoteCopy: false,     // pull rotating punchlines from the backend (falls back to bundled copy)
-  tally: false,          // send anonymous aggregate swipe pings (no PII) for the global counter
+  remoteProfiles: true,  // fetch cached profiles from the backend (falls back to on-device generation)
+  remoteCopy: false,     // bundled copy is richer than the backend subset; keep local for now
+  tally: false,          // enable together with the "N holograms judged" landing counter
 };
