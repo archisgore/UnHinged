@@ -22,8 +22,20 @@ export async function fetchCopy() {
   } catch { return null; }
 }
 
-// Anonymous "a swipe happened" ping — no identity, no body. Fire-and-forget.
-export function tally() {
-  if (!FEATURES.tally) return;
-  try { fetch(`${API}/tally`, { method: "POST", keepalive: true }).catch(() => {}); } catch {}
+// Anonymous "a swipe happened" ping — no identity, no body. Returns the new
+// global count (or null on failure / when disabled).
+export async function tally() {
+  if (!FEATURES.tally) return null;
+  try {
+    const r = await fetch(`${API}/tally`, { method: "POST", keepalive: true });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+// The global aggregate counter (best-effort; no flag, no PII).
+export async function fetchStats() {
+  try {
+    const r = await fetch(`${API}/stats`);
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
 }

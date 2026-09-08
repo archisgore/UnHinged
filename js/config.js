@@ -13,5 +13,5 @@ export const FEATURES = {
   accounts: false,       // there are no accounts; the buttons refuse, on purpose
   remoteProfiles: true,  // fetch cached profiles from the backend (falls back to on-device generation)
   remoteCopy: false,     // bundled copy is richer than the backend subset; keep local for now
-  tally: false,          // enable together with the "N holograms judged" landing counter
+  tally: true,           // powers the global "N holograms judged" counter (anonymous, no PII)
 };

@@ -3,7 +3,7 @@ import { avatarSVG } from "./avatar.js";
 import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
-import { fetchProfiles, fetchCopy, tally } from "./net.js";
+import { fetchProfiles, fetchCopy, tally, fetchStats } from "./net.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -28,6 +28,17 @@ showPitch();
 const pitchTimer = setInterval(showPitch, 4200);
 // Optionally refresh punchlines from the backend (falls back to bundled).
 fetchCopy().then((c) => { if (c && Array.isArray(c.pitches) && c.pitches.length) pitches = c.pitches; });
+
+// Global "N holograms judged" counter (anonymous aggregate; best-effort).
+function setHolo(n) {
+  if (typeof n !== "number") return;
+  const txt = `🛸 <b>${n.toLocaleString()}</b> holograms judged and counting`;
+  for (const id of ["#holo-count", "#holo-count-about"]) {
+    const el = $(id);
+    if (el) { el.innerHTML = txt; el.hidden = false; }
+  }
+}
+fetchStats().then((s) => { if (s) setHolo(s.swipes); });
 $("#start-btn").addEventListener("click", startApp);
 
 /* ───────── About sheet ───────── */
@@ -365,7 +376,7 @@ function finishSwipe(el, action) {
 /* ───────── Engagement: streaks + achievements ───────── */
 function recordSwipe() {
   swipes++;
-  tally(); // anonymous aggregate ping (no-op unless FEATURES.tally)
+  tally().then((res) => { if (res && typeof res.swipes === "number") setHolo(res.swipes); });
   hideHint();
   resetIdle();
   const now = Date.now();
