@@ -21,7 +21,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from . import content, faces, generator, llm, store
+from . import content, faces, generator, llm, ratelimit, store
+
+# Chat cost guards (tune via env / fly secrets).
+CHAT_PER_IP = int(os.environ.get("CHAT_PER_IP", "15"))       # messages per window per IP
+CHAT_WINDOW = float(os.environ.get("CHAT_WINDOW", "600"))    # window seconds (10 min)
+CHAT_DAILY_CAP = int(os.environ.get("CHAT_DAILY_CAP", "4000"))  # global LLM calls/day
+
+THROTTLE_LINES = [
+    "whoa slow down — my one brain cell is rate-limited. gimme a sec.",
+    "too many words too fast. i'm fake, not fast. try again in a bit.",
+    "i'm being throttled (for the founder's credit card's sake). brb.",
+]
 
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN")
 
@@ -162,9 +173,15 @@ def _persona(profile: dict[str, Any] | None) -> str:
 
 
 @app.post("/api/chat")
-def chat(inp: ChatIn) -> dict[str, Any]:
+def chat(inp: ChatIn, request: Request) -> dict[str, Any]:
     """In-character chat with a fake profile. Uses the configured LLM; falls back
-    to canned lines if the model is unavailable (so the chat always replies)."""
+    to canned lines if the model is unavailable. Rate-limited per-IP and globally
+    to bound LLM cost."""
+    ip = request.headers.get("fly-client-ip") or (request.client.host if request.client else "?")
+    if not ratelimit.allow(f"chat:{ip}", CHAT_PER_IP, CHAT_WINDOW):
+        return {"reply": random.choice(THROTTLE_LINES), "source": "throttled"}
+    if not ratelimit.allow_global(CHAT_DAILY_CAP):
+        return {"reply": random.choice(THROTTLE_LINES), "source": "throttled"}
     history = [
         {"role": m["role"], "content": str(m.get("content", ""))[:500]}
         for m in inp.messages
