@@ -315,11 +315,13 @@ function renderProfile(p) {
 }
 
 function renderInterstitial(d) {
+  const big = d.big || d.q || "";      // generated cards use {q,a}; curated use {big,small}
+  const small = d.small || d.a || "";
   return `
     <span class="stamp stamp-like">LIKE</span>
     <span class="stamp stamp-nope">NOPE</span>
-    <div class="big">${d.big}</div>
-    <div class="small">${d.small}</div>
+    <div class="big">${big}</div>
+    <div class="small">${small}</div>
     <img class="mark" src="assets/mark.svg" alt="Unhinged" width="46" height="46"/>`;
 }
 

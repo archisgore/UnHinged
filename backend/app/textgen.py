@@ -81,7 +81,7 @@ def _parse(kind_of_parse: str, txt: str) -> list[Any]:
                 continue
             a, b = line.split("::", 1)
             a, b = _clean(a), b.strip()
-            if 2 <= len(a) <= 60 and 3 <= len(b) <= 160:
+            if 2 <= len(a) <= 80 and 3 <= len(b) <= 220:  # roomier for unhinged answers
                 out.append({"q": a, "a": b})
         else:
             s = _clean(line)
