@@ -27,3 +27,9 @@ jobs:
           echo
           echo "Corpus (warm runs in the background; grows over the next few minutes):"
           curl -sS "https://api.unhinged.love/api/corpus"
+          echo
+          echo "Growing the text banks (taglines/bios/names/prompts/cards/pitches)…"
+          curl -sS -X POST "https://api.unhinged.love/api/admin/gentext?n=12" \
+            -H "x-admin-token: ${{ secrets.UNHINGED_ADMIN_TOKEN }}" --max-time 60
+          echo
+          curl -sS "https://api.unhinged.love/api/text-stats"

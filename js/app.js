@@ -41,8 +41,12 @@ const showPitch = () => {
 };
 showPitch();
 const pitchTimer = setInterval(showPitch, 4200);
-// Optionally refresh punchlines from the backend (falls back to bundled).
-fetchCopy().then((c) => { if (c && Array.isArray(c.pitches) && c.pitches.length) pitches = c.pitches; });
+// Pull ever-growing generated copy from the backend (falls back to bundled).
+let remoteCards = [];
+fetchCopy().then((c) => {
+  if (c && Array.isArray(c.pitches) && c.pitches.length) pitches = c.pitches;
+  if (c && Array.isArray(c.cards) && c.cards.length) remoteCards = c.cards;
+});
 
 // Global "N holograms judged" counter (anonymous aggregate; best-effort).
 function setHolo(n) {
@@ -218,7 +222,8 @@ function nextItem() {
   itemCount++;
   const interval = Math.max(4, 8 - prefs.chaos); // chaos preference = more interstitials
   if (itemCount % interval === 0) {
-    return { type: "inter", data: C.rotate(C.INTERSTITIALS, Math.floor(itemCount / interval)) };
+    const cards = remoteCards.length ? remoteCards : C.INTERSTITIALS;
+    return { type: "inter", data: cards[Math.floor(Math.random() * cards.length)] };
   }
   // Prefer a backend profile (random, no-repeat); fall back on-device but still
   // give it a real backend photo so we never show the old SVG cartoons.

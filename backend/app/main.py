@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from . import content, faces, generator, llm, ratelimit, store
+from . import content, faces, generator, llm, ratelimit, store, textgen
 
 # Chat cost guards (tune via env / fly secrets).
 CHAT_PER_IP = int(os.environ.get("CHAT_PER_IP", "15"))       # messages per window per IP
@@ -79,6 +79,20 @@ def admin_warm(request: Request, chunk: int = 40) -> Any:
     return faces.warm_async(max(1, min(chunk, 200)))
 
 
+@app.post("/api/admin/gentext")
+def admin_gentext(request: Request, n: int = 10) -> Any:
+    """Grow the text banks (taglines/bios/names/prompts/cards/pitches). Token-gated."""
+    if not ADMIN_TOKEN or request.headers.get("x-admin-token") != ADMIN_TOKEN:
+        return Response(status_code=401)
+    return textgen.top_up_async(max(1, min(n, 40)))
+
+
+@app.get("/api/text-stats")
+def text_stats() -> dict[str, Any]:
+    """How big each generated text bank is (the ever-growing content database)."""
+    return textgen.stats()
+
+
 def _with_face(request: Request, p: dict[str, Any]) -> dict[str, Any]:
     """Attach a stable, absolute face URL (host-agnostic via the request)."""
     if not faces.ENABLED:
@@ -121,8 +135,12 @@ def face(fid: str) -> Response:
 
 @app.get("/api/copy")
 def copy() -> dict[str, Any]:
-    """Rotating marketing copy so the client can pull fresh lines (optional)."""
-    return {"tagline": content.TAGLINE, "pitches": content.PITCHES}
+    """Marketing copy for the client — curated + ever-growing generated banks."""
+    return {
+        "tagline": content.TAGLINE,
+        "pitches": content.PITCHES + textgen.bank("pitches"),
+        "cards": textgen.bank("cards"),  # generated interstitial cards (may be empty)
+    }
 
 
 @app.get("/api/stats")

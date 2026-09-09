@@ -12,7 +12,7 @@ import hashlib
 import random
 from typing import Any
 
-from . import content
+from . import content, textgen
 
 
 def _rng(seed: str) -> random.Random:
@@ -29,18 +29,28 @@ def _compat(r: random.Random) -> str:
 def make_profile(i: int, salt: int = 0) -> dict[str, Any]:
     seed = f"unhinged:{i}" if salt == 0 else f"unhinged:{i}.{salt}"
     r = _rng(seed)
-    prompts = [{"q": q, "a": r.choice(answers)} for q, answers in r.sample(content.PROMPTS, 3)]
+    # Draw from curated + ever-growing generated banks, so newer ids get fresher
+    # content as the banks fill (see textgen.py).
+    names = content.NAMES + textgen.bank("names")
+    taglines = content.TAGLINES + textgen.bank("taglines")
+    bios = content.BIOS + textgen.bank("bios")
+    curated_prompts = [{"q": q, "a": r.choice(answers)} for q, answers in r.sample(content.PROMPTS, 3)]
+    gen_prompts = textgen.bank("prompts")
+    prompts = [
+        (r.choice(gen_prompts) if gen_prompts and r.random() < 0.5 else cp)
+        for cp in curated_prompts
+    ]
     n_interests = r.randint(3, 5)
     return {
         "id": str(i),
         "seed": seed,  # client renders the avatar deterministically from this
         "image": None,  # future: pre-generated photorealistic AI image URL
-        "name": r.choice(content.NAMES),
+        "name": r.choice(names),
         "age": r.choice(content.AGES),
         "job": r.choice(content.JOBS),
         "distance": r.choice(content.DISTANCE),
-        "tagline": r.choice(content.TAGLINES),
-        "bio": r.choice(content.BIOS),
+        "tagline": r.choice(taglines),
+        "bio": r.choice(bios),
         "interests": r.sample(content.INTERESTS, n_interests),
         "prompts": prompts,
         "greenflag": r.choice(content.RED_AS_GREEN),
