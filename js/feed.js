@@ -92,3 +92,18 @@ export function makeFeedItem(seed) {
 export function makeFeedBatch(startSeed, n) {
   return Array.from({ length: n }, (_, i) => makeFeedItem(startSeed + i));
 }
+
+// Wrap a backend-generated (LLM) FML line into a feed card.
+export function fmlFromText(text, seed) {
+  const r = rngFrom("gen:" + seed);
+  const [a, b] = r.pick(FML_VERDICTS);
+  return { id: "g" + seed, type: "fml", text, agree: r.int(4, 99999), verdictA: a, verdictB: b, deserved: r.int(2, 42000) };
+}
+
+// Finite Scroll: the feed ENDS — a parody of infinite scroll. Rotating manifesto.
+export const FINITE_ENDINGS = [
+  "You reached the end of the feed. Yes, it ends — that's the whole point.\nThere are only a few things in the world that truly deserve your attention, and an endless feed isn't one of them. We refuse to manufacture infinite crises to keep you here.\nGo take a break. Not to another app. To reality.",
+  "That's everything. We didn't invent 400 more outrages to trap you.\nMost of what's \"trending\" is engineered to hold your gaze; very little of it is actually yours to carry.\nClose the tab and go be a person. Reality misses you.",
+  "The end. A feed with a bottom — revolutionary, we know.\nYou don't need an endless stream of triggers. You need water, a stretch, and maybe a nap.\nDon't hop to another app. Go outside. It's real out there.",
+  "Fin. (That's roughly French for 'go touch grass'.)\nThe world has maybe five things worth your worry today, and none of them live in a feed.\nGo find the real ones. We'll be here, being fake, not going anywhere.",
+];

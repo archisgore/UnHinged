@@ -26,17 +26,26 @@
     <p class="feed-intro">Dispatches from a dating app where no one is real. Inspired by FML and The Onion — and, like them and everything here, entirely made up.</p>
   </main>
 
-  <div class="feed-more-wrap">
-    <button class="btn btn-primary" id="feed-more">More nonsense ↻</button>
+  <div class="feed-more-wrap" id="feed-more-wrap" hidden>
+    <button class="btn btn-ghost" id="feed-more"></button>
   </div>
 
   <script type="module">
-    import { makeFeedItem } from "./js/feed.js";
+    import { makeFeedItem, fmlFromText, FINITE_ENDINGS } from "./js/feed.js";
+
     const feed = document.getElementById("feed");
+    const moreWrap = document.getElementById("feed-more-wrap");
+    const moreBtn = document.getElementById("feed-more");
+    const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+    const local = ["localhost", "127.0.0.1"].includes(location.hostname);
+    const API = local ? "http://localhost:8000/api" : "https://api.unhinged.love/api";
+
     let seed = Math.floor(Math.random() * 100000);
     let lastText = "";
-
-    const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    let genFeed = [];        // fresh LLM-generated FML lines from the backend
+    let indulged = 0;        // how many times the user asked for "more"
+    const MAX_INDULGE = 2;
 
     function card(item) {
       const el = document.createElement("article");
@@ -57,24 +66,58 @@
       return el;
     }
 
-    function load(n = 8) {
+    // One feed item: prefer a fresh LLM-generated line, else combinatorial.
+    function nextItem() {
+      if (genFeed.length && Math.random() < 0.55) {
+        return fmlFromText(genFeed[Math.floor(Math.random() * genFeed.length)], seed++);
+      }
+      return makeFeedItem(seed++);
+    }
+
+    function append(n) {
       let added = 0;
       while (added < n) {
-        const item = makeFeedItem(seed++);
-        if (item.text === lastText) continue; // skip back-to-back repeats
+        const item = nextItem();
+        if (item.text === lastText) continue; // no back-to-back repeats
         feed.appendChild(card(item));
         lastText = item.text;
         added++;
       }
     }
 
-    document.getElementById("feed-more").addEventListener("click", load);
-    // infinite scroll
-    new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) load();
-    }).observe(document.getElementById("feed-more"));
+    function showEnding() {
+      const msg = FINITE_ENDINGS[Math.floor(Math.random() * FINITE_ENDINGS.length)];
+      const end = document.createElement("section");
+      end.className = "feed-end";
+      end.innerHTML = `
+        <div class="feed-end-mark">🌅</div>
+        <div class="feed-end-kicker">Finite Scroll™</div>
+        <p class="feed-end-text">${esc(msg)}</p>
+        <a class="btn btn-primary" href="index.html">Okay, I'm going ↗</a>`;
+      feed.appendChild(end);
+      if (indulged < MAX_INDULGE) {
+        moreBtn.textContent = indulged === 0 ? "fine, 5 more (you don't need them)" : "5 more, then that's genuinely it";
+        moreWrap.hidden = false;
+      } else {
+        moreWrap.hidden = true;
+      }
+    }
 
-    load(10);
+    moreBtn.addEventListener("click", () => {
+      indulged++;
+      moreWrap.hidden = true;
+      feed.querySelector(".feed-end")?.remove();
+      append(5);
+      showEnding();
+    });
+
+    // Load a FINITE run (fresh generated + combinatorial), then end. No infinite scroll.
+    fetch(`${API}/copy`).then((r) => r.ok ? r.json() : null).then((c) => {
+      if (c && Array.isArray(c.feed)) genFeed = c.feed;
+    }).catch(() => {}).finally(() => {
+      append(14);
+      showEnding();
+    });
   </script>
 </body>
 </html>

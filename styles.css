@@ -370,6 +370,15 @@ button { font-family: inherit; cursor: pointer; }
 .feed-onion { background: linear-gradient(170deg,#fff,#fff6f8); }
 .feed-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; font-weight: 600; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
 .feed-more-wrap { text-align: center; padding: 8px 16px calc(40px + var(--safe-b)); }
+/* Finite Scroll — the manifesto ending */
+.feed-end {
+  text-align: center; padding: 40px 26px; margin-top: 8px;
+  background: linear-gradient(165deg, #fff, #eef6ff); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: 0 8px 24px -16px rgba(29,26,28,.25);
+}
+.feed-end-mark { font-size: 44px; }
+.feed-end-kicker { font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--pink); margin-top: 8px; }
+.feed-end-text { white-space: pre-line; font-size: 17px; line-height: 1.55; color: #2c2a33; margin: 16px auto 22px; max-width: 42ch; }
 
 /* ───────── Legal / Terms page ───────── */
 .legal {

@@ -141,6 +141,7 @@ def copy() -> dict[str, Any]:
         "pitches": content.PITCHES + textgen.bank("pitches"),
         "cards": textgen.bank("cards"),   # generated interstitial cards (may be empty)
         "detox": textgen.bank("detox"),   # generated evidence-based detox reminders
+        "feed": textgen.bank("feed"),     # generated FML-style feed dispatches
     }
 
 

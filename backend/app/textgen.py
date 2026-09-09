@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 from typing import Any
 
@@ -40,6 +41,9 @@ _SPEC: dict[str, tuple[str, str]] = {
                 "dating-app question, the answer is unhinged. Format EXACTLY 'prompt :: answer', "
                 "one per line, no numbering.", "pair"),
     # Sincere — deliberately NOT the unhinged voice; grounded in real research.
+    "feed": (f"Write {{n}} short 'FML'-style confessions {VOICE} Each begins with 'Today,' and ends with "
+             "'FML.', about doom-swiping this fake dating app, matching with obviously-AI people, catching "
+             "feelings for a gradient, etc. Under 200 chars, one per line, no numbering.", "line"),
     "detox": (
         "Write {n} short, SINCERE digital-detox micro-actions for someone doom-scrolling a parody dating app. "
         "Ground each one in EVIDENCE-BASED digital-wellbeing / attention research, e.g.: Attention Restoration "
@@ -80,8 +84,16 @@ def bank(kind: str) -> list[Any]:
     return list(_cache[kind][1])
 
 
+_HEADER_RE = re.compile(r"(micro-?action|reminder|here are|following|dispatch|confession)s?\b", re.I)
+
+
 def _clean(s: str) -> str:
-    return s.strip().strip('"').lstrip("-•*0123456789. ").strip().strip('"').strip()
+    return s.strip().strip('"').lstrip("#-•*0123456789. ").strip().strip('"').strip()
+
+
+def _looks_like_header(s: str) -> bool:
+    # Drop the LLM's occasional preamble/title lines ("# 12 Digital-Detox Micro-Actions").
+    return s.endswith(":") or (_HEADER_RE.search(s) is not None and " " in s and len(s) < 45)
 
 
 def _parse(kind_of_parse: str, txt: str) -> list[Any]:
@@ -96,7 +108,7 @@ def _parse(kind_of_parse: str, txt: str) -> list[Any]:
                 out.append({"q": a, "a": b})
         else:
             s = _clean(line)
-            if 3 <= len(s) <= 170:
+            if 3 <= len(s) <= 220 and not _looks_like_header(s):
                 out.append(s)
     return out
 
