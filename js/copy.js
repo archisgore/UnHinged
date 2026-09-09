@@ -61,6 +61,14 @@ export const LIKE_TOASTS = [
   "You have taste. They have no soul. Balanced.",
   "Noted by absolutely nobody.",
 ];
+// They didn't swipe back (matching is a two-way coin flip now).
+export const NO_MATCH_TOASTS = [
+  "They didn't swipe back. Rejected by a hologram. A bold new low.",
+  "No match. They're fake AND they're not into you. Impressive.",
+  "Swiped into the void. The void swiped left.",
+  "Unrequited, and they don't even exist. Poetic, honestly.",
+  "They said no. Well — they said nothing. They can't. Still stings.",
+];
 export const SUPER_TOASTS = [
   "Super Unhinged?! You KNOW they're not real, right?",
   "That's the spirit. Down horrendous for a gradient.",

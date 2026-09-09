@@ -310,6 +310,7 @@ function renderProfile(p) {
       <span class="stamp stamp-nope">NOPE</span>
       <div class="photo-name">
         <span class="compat">${p.compat} match</span>
+        ${p.persona && p.persona.label ? `<span class="vibe">vibe: ${p.persona.label}</span>` : ""}
         <h2>${p.name}<span style="font-weight:400"> ${p.age}</span></h2>
         <div class="sub">${p.job}</div>
         <div class="dist">📍 ${p.distance}</div>
@@ -517,13 +518,25 @@ $("#install-btn").addEventListener("click", async () => {
 });
 
 /* ───────── Reactions ───────── */
+// Do they swipe back? A right-swipe is NOT a guaranteed match — the "other
+// side" decides at random. Super-likes and liked-prompts have better odds;
+// legendary profiles a little better still — but none are certain.
+function matchesBack(action, item, likedPrompt) {
+  if (item.type !== "profile") return false;
+  const boost = item.profile.legendary ? 0.2 : 0;
+  const base = action === "super" ? 0.7 : likedPrompt ? 0.6 : 0.35;
+  return Math.random() < Math.min(0.9, base + boost);
+}
 function reactTo(action, item, likedPrompt) {
   if (action === "nope") { toast(pick(C.NOPE_TOASTS)); return; }
-  if (item.type !== "profile") { toast(action === "super" ? pick(C.SUPER_TOASTS) : pick(C.LIKE_TOASTS)); return; }
-  if (action === "super" || likedPrompt) { toast(pick(C.SUPER_TOASTS)); showMatch(item, likedPrompt); return; }
-  // like: variable reward. Legendary always matches; others ~40%.
-  toast(pick(C.LIKE_TOASTS));
-  if (item.profile.legendary || Math.random() < 0.4) showMatch(item, likedPrompt);
+  if (matchesBack(action, item, likedPrompt)) {
+    toast(action === "super" ? pick(C.SUPER_TOASTS) : pick(C.LIKE_TOASTS));
+    showMatch(item, likedPrompt);
+  } else if (item.type === "profile" && Math.random() < 0.5) {
+    toast(pick(C.NO_MATCH_TOASTS)); // they didn't swipe back
+  } else {
+    toast(action === "super" ? pick(C.SUPER_TOASTS) : pick(C.LIKE_TOASTS));
+  }
 }
 
 /* ───────── Action bar ───────── */

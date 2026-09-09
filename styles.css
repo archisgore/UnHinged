@@ -258,6 +258,10 @@ button { font-family: inherit; cursor: pointer; }
   background: rgba(255,61,110,.9); border-radius: 999px; padding: 3px 9px; margin-bottom: 6px;
   backdrop-filter: blur(2px);
 }
+.vibe {
+  display: inline-block; font-size: 11px; font-weight: 700; color: #fff; margin-left: 6px; margin-bottom: 6px;
+  background: rgba(0,0,0,.4); border-radius: 999px; padding: 3px 9px; backdrop-filter: blur(2px);
+}
 .standout-ribbon {
   position: absolute; top: 44px; left: 14px; z-index: 2;
   font-size: 11px; font-weight: 900; letter-spacing: .04em; color: #6b4e00;

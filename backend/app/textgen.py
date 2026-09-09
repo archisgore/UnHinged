@@ -41,6 +41,12 @@ _SPEC: dict[str, tuple[str, str]] = {
                 "dating-app question, the answer is unhinged. Format EXACTLY 'prompt :: answer', "
                 "one per line, no numbering.", "pair"),
     # Sincere — deliberately NOT the unhinged voice; grounded in real research.
+    "personas": (f"Write {{n}} exaggerated dating-app personality archetypes that the internet currently "
+                 "stereotypes (think the ones people meme about on TikTok/Reddit dating discourse: e.g. valley "
+                 "girl, emotionally distant guy, gym bro, crypto guy, cottagecore girl, situationship enthusiast, "
+                 "corporate LinkedIn guy, love-bomber). For each: a short label, then one sentence on how they "
+                 f"TEXT/talk. This is {VOICE} Format EXACTLY 'label :: how they text', one per line, no numbering.",
+                 "pair"),
     "feed": (f"Write {{n}} short 'FML'-style confessions {VOICE} Each begins with 'Today,' and ends with "
              "'FML.', about doom-swiping this fake dating app, matching with obviously-AI people, catching "
              "feelings for a gradient, etc. Under 200 chars, one per line, no numbering.", "line"),

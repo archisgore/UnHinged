@@ -181,10 +181,18 @@ def _persona(profile: dict[str, Any] | None) -> str:
     name = str(p.get("name", "someone"))[:40]
     job = str(p.get("job", "professional nobody"))[:60]
     tag = str(p.get("tagline", ""))[:80]
+    persona = p.get("persona") or {}
+    archetype = str(persona.get("label", ""))[:40]
+    voice = str(persona.get("voice", ""))[:160]
+    archetype_line = (
+        f"You are the '{archetype}' archetype: {voice}. Text exactly like that. "
+        if archetype else ""
+    )
     return (
         f"You are {name}, a character on 'Unhinged', a parody dating app where EVERY profile "
         f"and photo is 100% AI-generated and fake — and you know it and lean into it. "
         f"Your 'job' is: {job}. Your tagline is: \"{tag}\". "
+        f"{archetype_line}"
         "Stay fully in character as this unhinged, witty, deadpan, chaotic-but-harmless dating "
         "persona. Keep replies to ONE or TWO short sentences. Be funny and a little absurd. "
         "You may playfully acknowledge you're AI/fake. Keep it SFW and never hostile. "

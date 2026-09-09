@@ -40,9 +40,13 @@ def make_profile(i: int, salt: int = 0) -> dict[str, Any]:
         (r.choice(gen_prompts) if gen_prompts and r.random() < 0.5 else cp)
         for cp in curated_prompts
     ]
+    # Persona archetype (curated + generated bank; generated items are {q,a}).
+    gen_personas = [{"label": p["q"], "voice": p["a"]} for p in textgen.bank("personas")]
+    persona = r.choice(content.PERSONAS + gen_personas)
     n_interests = r.randint(3, 5)
     return {
         "id": str(i),
+        "persona": persona,
         "seed": seed,  # client renders the avatar deterministically from this
         "image": None,  # future: pre-generated photorealistic AI image URL
         "name": r.choice(names),

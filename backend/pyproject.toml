@@ -24,6 +24,9 @@ line-length = 120  # content banks contain long single-line joke strings
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+"app/content.py" = ["E501"]  # data file: long single-line joke/persona strings
+
 [tool.mypy]
 strict = true
 files = ["app", "tests"]
