@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from . import content, faces, generator, store
+from . import content, faces, generator, llm, store
 
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN")
 
@@ -128,6 +128,53 @@ def tally() -> dict[str, Any]:
 class Creds(BaseModel):
     email: str | None = None
     password: str | None = None
+
+
+CHAT_FALLBACKS = [
+    "omg hi!! sorry i was buffering emotionally",
+    "that's so real. well — it's not, neither am I, but you know.",
+    "wow. anyway have you considered that I'm a language model in a trench coat",
+    "haha stop, you're gonna make my gradient blush",
+    "i would text back sooner but i don't experience time",
+    "brb ghosting you — kidding, i lack object permanence",
+]
+
+
+class ChatIn(BaseModel):
+    profile: dict[str, Any] | None = None
+    messages: list[dict[str, str]] = []
+
+
+def _persona(profile: dict[str, Any] | None) -> str:
+    p = profile or {}
+    name = str(p.get("name", "someone"))[:40]
+    job = str(p.get("job", "professional nobody"))[:60]
+    tag = str(p.get("tagline", ""))[:80]
+    return (
+        f"You are {name}, a character on 'Unhinged', a parody dating app where EVERY profile "
+        f"and photo is 100% AI-generated and fake — and you know it and lean into it. "
+        f"Your 'job' is: {job}. Your tagline is: \"{tag}\". "
+        "Stay fully in character as this unhinged, witty, deadpan, chaotic-but-harmless dating "
+        "persona. Keep replies to ONE or TWO short sentences. Be funny and a little absurd. "
+        "You may playfully acknowledge you're AI/fake. Keep it SFW and never hostile. "
+        "Never give real-world personal info, never claim to be a real human you could actually meet."
+    )
+
+
+@app.post("/api/chat")
+def chat(inp: ChatIn) -> dict[str, Any]:
+    """In-character chat with a fake profile. Uses the configured LLM; falls back
+    to canned lines if the model is unavailable (so the chat always replies)."""
+    history = [
+        {"role": m["role"], "content": str(m.get("content", ""))[:500]}
+        for m in inp.messages
+        if m.get("role") in ("user", "assistant") and m.get("content")
+    ][-10:]
+    messages = [{"role": "system", "content": _persona(inp.profile)}, *history]
+    reply = llm.chat(messages, max_tokens=90, temperature=1.05, timeout=20)
+    if not reply:
+        return {"reply": random.choice(CHAT_FALLBACKS), "source": "fallback"}
+    return {"reply": reply[:400], "source": "llm"}
 
 
 @app.post("/api/auth/login")

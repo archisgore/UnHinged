@@ -2,7 +2,7 @@ import { makeProfile, CERTIFIED } from "./generator.js";
 import * as C from "./copy.js";
 import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
-import { fetchProfilesByIds, faceUrl, fetchCopy, tally, fetchStats, fetchCorpus } from "./net.js";
+import { fetchProfilesByIds, faceUrl, fetchCopy, tally, fetchStats, fetchCorpus, chat as askBot } from "./net.js";
 import "./analytics.js";
 
 // Deterministic gradient per profile — the placeholder behind each photo while
@@ -550,6 +550,8 @@ $("#match-share-btn").addEventListener("click", () => { if (currentMatch) shareP
 
 /* ───────── Chat (obviously-AI bot) ───────── */
 let chatItem = null;
+let chatHistory = []; // [{role, content}] for the LLM
+let chatBusy = false;
 function openChat(item) {
   chatItem = item;
   const p = item.profile;
@@ -559,7 +561,9 @@ function openChat(item) {
   $("#chat-msgs").innerHTML = "";
   $("#chat-starters").innerHTML = C.CONVO_STARTERS
     .map((s) => `<button class="starter">${s}</button>`).join("");
-  addMsg("bot", pick(C.BOT_REPLIES));
+  const greeting = pick(C.BOT_REPLIES);
+  addMsg("bot", greeting);
+  chatHistory = [{ role: "assistant", content: greeting }];
   openLayer("chat-sheet");
 }
 $("#chat-starters").addEventListener("click", (e) => {
@@ -572,11 +576,19 @@ $("#chat-form").addEventListener("submit", (e) => {
   const v = input.value.trim();
   if (v) { send(v); input.value = ""; }
 });
-function send(text) {
+async function send(text) {
+  if (chatBusy) return;
+  chatBusy = true;
   addMsg("me", text);
   vibrate(6);
+  chatHistory.push({ role: "user", content: text });
   const t = $("#chat-typing"); t.hidden = false; scrollChat();
-  setTimeout(() => { t.hidden = true; addMsg("bot", pick(C.BOT_REPLIES)); }, 650 + Math.random() * 500);
+  // Real in-character reply from the backend LLM; canned fallback if it's down.
+  const reply = (await askBot(chatItem && chatItem.profile, chatHistory)) || pick(C.BOT_REPLIES);
+  t.hidden = true;
+  addMsg("bot", reply);
+  chatHistory.push({ role: "assistant", content: reply });
+  chatBusy = false;
 }
 function addMsg(who, text) {
   const div = document.createElement("div");

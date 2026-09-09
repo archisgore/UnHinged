@@ -19,6 +19,20 @@ export function faceUrl(id) {
   return `${API}/faces/${id}`;
 }
 
+// In-character chat with a fake profile. Returns the reply text, or null.
+export async function chat(profile, messages) {
+  try {
+    const r = await fetch(`${API}/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ profile, messages }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.reply || null;
+  } catch { return null; }
+}
+
 export async function fetchCopy() {
   if (!FEATURES.remoteCopy) return null;
   try {
