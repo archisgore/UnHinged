@@ -43,9 +43,11 @@ showPitch();
 const pitchTimer = setInterval(showPitch, 4200);
 // Pull ever-growing generated copy from the backend (falls back to bundled).
 let remoteCards = [];
+let remoteDetox = [];
 fetchCopy().then((c) => {
   if (c && Array.isArray(c.pitches) && c.pitches.length) pitches = c.pitches;
   if (c && Array.isArray(c.cards) && c.cards.length) remoteCards = c.cards;
+  if (c && Array.isArray(c.detox) && c.detox.length) remoteDetox = c.detox;
 });
 
 // Global "N holograms judged" counter (anonymous aggregate; best-effort).
@@ -222,6 +224,11 @@ function nextItem() {
   itemCount++;
   const interval = Math.max(4, 8 - prefs.chaos); // chaos preference = more interstitials
   if (itemCount % interval === 0) {
+    // ≤20% of interstitial moments are sincere digital-detox reminders.
+    if (Math.random() < 0.2) {
+      const pool = remoteDetox.length ? remoteDetox : C.DETOX;
+      return { type: "detox", data: pool[Math.floor(Math.random() * pool.length)] };
+    }
     const cards = remoteCards.length ? remoteCards : C.INTERSTITIALS;
     return { type: "inter", data: cards[Math.floor(Math.random() * cards.length)] };
   }
@@ -245,6 +252,9 @@ function addCard(item = nextItem()) {
   if (item.type === "profile") {
     if (item.profile.legendary) el.classList.add("legendary");
     el.innerHTML = renderProfile(item.profile);
+  } else if (item.type === "detox") {
+    el.classList.add("detox");
+    el.innerHTML = renderDetox(item.data);
   } else {
     el.classList.add("inter");
     el.innerHTML = renderInterstitial(item.data);
@@ -312,6 +322,14 @@ function renderProfile(p) {
       ${prompts}
       <div class="greenflag">Green flag: ${p.greenflag}</div>
     </div>`;
+}
+
+function renderDetox(text) {
+  return `
+    <div class="detox-mark">🌿</div>
+    <div class="detox-kicker">a genuinely real reminder</div>
+    <div class="detox-text">${text}</div>
+    <div class="detox-foot">the profiles are fake. this isn't.</div>`;
 }
 
 function renderInterstitial(d) {

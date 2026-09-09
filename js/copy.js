@@ -204,4 +204,20 @@ export const PREFS = {
   },
 };
 
+// Sincere digital-detox reminders — the one genuinely caring thing in a fake
+// app. Warm, not preachy, with the faintest wink. Shown occasionally (≤20% of
+// interstitial moments) as a real counterpoint to the doomswipe.
+export const DETOX = [
+  "Go drink a full glass of water. No phone. We'll wait — we're not real anyway.",
+  "Stretch for 30 seconds. Reach for the ceiling. Your spine has feelings too.",
+  "Close your eyes for 30 seconds. Mute everything. Just breathe. We'll be here (unfortunately).",
+  "Take a 5-minute walk — laps around this room absolutely count.",
+  "Look at something 20 feet away for 20 seconds. Your eyes deserve a real horizon.",
+  "Unclench your jaw. Drop your shoulders. One slow breath in, one slow out.",
+  "Step outside for a minute. Real sky, real air, zero gradients.",
+  "Roll your neck slowly — left, then right. That's it. Nice.",
+  "Put the phone down and go say something kind to a real human today.",
+  "Drink some water and come back hydrated, gorgeous. The fake people can wait.",
+];
+
 export const rotate = (arr, i) => arr[i % arr.length];

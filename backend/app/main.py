@@ -139,7 +139,8 @@ def copy() -> dict[str, Any]:
     return {
         "tagline": content.TAGLINE,
         "pitches": content.PITCHES + textgen.bank("pitches"),
-        "cards": textgen.bank("cards"),  # generated interstitial cards (may be empty)
+        "cards": textgen.bank("cards"),   # generated interstitial cards (may be empty)
+        "detox": textgen.bank("detox"),   # generated evidence-based detox reminders
     }
 
 

@@ -39,6 +39,17 @@ _SPEC: dict[str, tuple[str, str]] = {
     "prompts": (f"Write {{n}} dating-profile prompt+answer pairs {VOICE} The prompt is a classic "
                 "dating-app question, the answer is unhinged. Format EXACTLY 'prompt :: answer', "
                 "one per line, no numbering.", "pair"),
+    # Sincere — deliberately NOT the unhinged voice; grounded in real research.
+    "detox": (
+        "Write {n} short, SINCERE digital-detox micro-actions for someone doom-scrolling a parody dating app. "
+        "Ground each one in EVIDENCE-BASED digital-wellbeing / attention research, e.g.: Attention Restoration "
+        "Theory (looking at nature or a distant view restores focus); the 20-20-20 rule (every 20 min look ~20 "
+        "feet away for 20 seconds); slow diaphragmatic or box breathing to calm the nervous system; standing up "
+        "and moving / a brief walk to break sedentary time; hydration; sensory grounding (name what you can see/"
+        "hear/feel); and physically putting the variable-reward device down or in another room. Each is a single "
+        "doable action, warm and caring, NOT preachy and NOT sarcastic (the faintest wink is ok). Under 100 chars, "
+        "one per line, no numbering.",
+        "line"),
 }
 
 _locks: dict[str, threading.Lock] = {}
