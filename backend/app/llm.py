@@ -41,7 +41,9 @@ def _anthropic_chat(messages: list[dict[str, str]], max_tokens: int,
         if not convo:
             return ""
         kwargs: dict[str, Any] = {"model": MODEL, "max_tokens": max_tokens,
-                                  "temperature": temperature, "messages": convo}
+                                  # Anthropic requires 0 <= temperature <= 1.0
+                                  "temperature": min(max(temperature, 0.0), 1.0),
+                                  "messages": convo}
         if system:
             kwargs["system"] = system
         resp = _client.with_options(timeout=timeout).messages.create(**kwargs)
