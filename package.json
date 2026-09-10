@@ -1,0 +1,26 @@
+{
+  "name": "unhinged-native",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Capacitor native shell for Unhinged — wraps the static web app (this repo) into iOS + Android apps. The web app remains the source of truth and keeps working as a PWA.",
+  "scripts": {
+    "build:web": "node scripts/build-web.mjs",
+    "sync": "npm run build:web && cap sync",
+    "ios": "npm run build:web && cap sync ios && cap open ios",
+    "android": "npm run build:web && cap sync android && cap open android",
+    "assets": "capacitor-assets generate --iconBackgroundColor '#ffffff' --splashBackgroundColor '#ffffff' --splashBackgroundColorDark '#1d1a1c'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.1"
+  }
+}

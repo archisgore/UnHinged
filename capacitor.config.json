@@ -1,0 +1,8 @@
+{
+  "appId": "love.unhinged.app",
+  "appName": "Unhinged",
+  "webDir": "www",
+  "backgroundColor": "#ffffff",
+  "ios": { "contentInset": "always" },
+  "android": {}
+}

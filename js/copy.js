@@ -150,6 +150,13 @@ export const BOT_REPLIES = [
   "brb ghosting you — kidding, i lack object permanence",
 ];
 
+// Report/block affordance for the AI chat (real safety valve + app-store review).
+export const REPORT = [
+  "Reported. It's AI-generated and fake, but thanks for keeping the void tidy.",
+  "Flagged. We'll pretend to review it with the same seriousness it deserves (some).",
+  "Noted. That one's been sent to the imaginary trust & safety team.",
+];
+
 export const SHARE = {
   title: "Unhinged — this fake person tho",
   text: (name) => `Behold ${name}, a 100% certified fake human on Unhinged. No account, no tracking, no shot at love — but LOOK at them.`,

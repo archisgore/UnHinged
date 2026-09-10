@@ -2,6 +2,11 @@
 node_modules/
 *.log
 
+# Capacitor native build (generated — regenerate with `npm run build:web && npx cap add ...`)
+www/
+ios/
+android/
+
 # Python backend
 backend/.venv/
 **/__pycache__/

@@ -4,6 +4,7 @@ import { sfx, initAudio, setMuted, isMuted } from "./sfx.js";
 import { login, signup } from "./auth.js";
 import { fetchProfilesByIds, faceUrl, fetchCopy, tally, fetchStats, fetchCorpus, chat as askBot } from "./net.js";
 import "./analytics.js";
+import { isNative, share as nativeShare, haptic, initNativeChrome } from "./native.js";
 
 // Deterministic gradient per profile — the placeholder behind each photo while
 // it loads (and if it ever fails). Replaces the old procedural SVG avatars.
@@ -158,7 +159,7 @@ $("#prefs-body").addEventListener("click", (e) => {
 
 /* ───────── Feedback helpers ───────── */
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function vibrate(p) { if (reduceMotion) return; try { navigator.vibrate && navigator.vibrate(p); } catch {} }
+function vibrate(p) { if (reduceMotion) return; haptic(p); } // native Haptics or navigator.vibrate
 
 /* ───────── Deck ───────── */
 const deck = $("#deck");
@@ -608,6 +609,11 @@ $("#chat-starters").addEventListener("click", (e) => {
   const b = e.target.closest(".starter");
   if (b) send(b.textContent);
 });
+$("#chat-report").addEventListener("click", () => {
+  vibrate(8);
+  toast(pick(C.REPORT));
+  closeLayer("chat-sheet");
+});
 $("#chat-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = $("#chat-text");
@@ -643,9 +649,7 @@ async function shareProfile(item) {
   const p = item.profile;
   const data = { title: C.SHARE.title, text: C.SHARE.text(p.name), url: C.SHARE.url };
   vibrate(8);
-  try {
-    if (navigator.share) { await navigator.share(data); return; }
-  } catch { return; }
+  if (await nativeShare(data)) return; // native share sheet / Web Share
   try { await navigator.clipboard.writeText(`${data.text} ${data.url}`); toast(C.SHARE.copied); }
   catch { toast(C.SHARE.url); }
 }
@@ -725,5 +729,9 @@ addEventListener("keydown", (e) => {
 
 /* ───────── PWA ───────── */
 if ("serviceWorker" in navigator) {
-  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  // Skip the service worker inside the native shell (assets are bundled locally).
+  if (!isNative) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
+
+// Native shell: dismiss the splash and style the status bar now that we've rendered.
+initNativeChrome();

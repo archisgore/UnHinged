@@ -7,7 +7,7 @@
 // (v2 was cache-first, which could pair a stale index.html with newer JS after
 // a deploy and soft-lock the landing screen. v3 fixes that.)
 
-const CACHE = "unhinged-v6";
+const CACHE = "unhinged-v7";
 const ASSETS = [
   ".",
   "index.html",
@@ -28,6 +28,7 @@ const ASSETS = [
   "js/net.js",
   "js/feed.js",
   "js/analytics.js",
+  "js/native.js",
 ];
 
 self.addEventListener("install", (e) => {

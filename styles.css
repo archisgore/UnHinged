@@ -306,6 +306,8 @@ button { font-family: inherit; cursor: pointer; }
 .chat-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .chat-face { position: relative; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; }
 .chat-name { font-weight: 800; font-size: 17px; }
+.chat-report { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--muted); font-size: 14px; }
+.chat-report:active { transform: scale(.9); }
 .chat-status { font-size: 11px; color: #17c964; }
 .chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 14px 2px; }
 .msg { max-width: 78%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; }
