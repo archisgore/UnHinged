@@ -7,6 +7,9 @@
   <meta name="description" content="A parody dating app. Every profile and photo is 100% certified AI-generated fake. No account, no tracking, no one is real. Doomswipe freely — worst case you don't find love, best case you're entertained." />
 
   <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://unhinged.love/" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="keywords" content="parody dating app, AI-generated dating profiles, fake dating app, doomscroll, digital detox, entertainment" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -30,16 +33,50 @@
   <meta name="twitter:image" content="https://unhinged.love/assets/og.png" />
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Structured data for search + agentic discovery -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Unhinged",
+        "alternateName": "Unhinged — the Dating App Fidget Spinner",
+        "url": "https://unhinged.love/",
+        "applicationCategory": "EntertainmentApplication",
+        "operatingSystem": "Any (web, iOS, Android)",
+        "description": "A parody dating app where every profile and photo is 100% certified AI-generated fake. No accounts, no tracking, no real people. A doomscroll toy that nudges you toward digital detox and a self-limiting 'Finite Scroll'.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "isFamilyFriendly": false,
+        "browserRequirements": "Requires JavaScript."
+      },
+      {
+        "@type": "WebSite",
+        "name": "Unhinged",
+        "url": "https://unhinged.love/"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
+  <noscript>
+    <div style="max-width:640px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;line-height:1.6">
+      <h1>Unhinged — the dating app that's 100% certified fake</h1>
+      <p>Unhinged is a parody dating app: every profile and every photo is 100% AI-generated and fake, and that's the whole point. There are no accounts, no tracking, and no real people. Swipe through endless gloriously unhinged fake profiles, chat with an obviously-AI bot, and read the self-limiting "Finite Scroll" feed. It needs JavaScript to run — enable it, or read the <a href="terms.html">Terms of Service</a>.</p>
+    </div>
+  </noscript>
+
   <!-- ───────── Landing / intro ───────── -->
   <section id="landing" class="landing">
     <div class="landing-inner">
-      <img class="hero-logo" src="assets/logo.svg" alt="Unhinged" width="112" height="112" />
-      <p class="kicker" id="hero-kicker"></p>
-      <h1 class="hero-title" id="hero-title"></h1>
-      <p class="hero-sub" id="hero-sub"></p>
-      <button class="btn btn-primary btn-cta" id="start-btn"></button>
+      <img class="hero-logo" src="assets/logo.svg" alt="Unhinged logo — a heart hanging off a hinge" width="112" height="112" />
+      <!-- Default text is crawlable by no-JS bots; app.js overwrites it on load. -->
+      <p class="kicker" id="hero-kicker">Dating App Fidget Spinner</p>
+      <h1 class="hero-title" id="hero-title">Unhinged</h1>
+      <p class="hero-sub" id="hero-sub">The dating app where every profile and photo is 100% certified AI-generated fake. No accounts, no tracking, no real people — just doomswipe for the entertainment.</p>
+      <button class="btn btn-primary btn-cta" id="start-btn">Start doomswiping</button>
       <div class="auth-row">
         <button class="btn btn-ghost" id="dont-login-btn"></button>
         <button class="btn btn-ghost" id="dont-signup-btn"></button>

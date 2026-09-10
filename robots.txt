@@ -1,0 +1,17 @@
+# Unhinged — everything here is 100% fake AI content, crawl freely.
+User-agent: *
+Allow: /
+
+# AI/agent crawlers are explicitly welcome (agentic discovery).
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://unhinged.love/sitemap.xml

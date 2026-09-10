@@ -1,0 +1,20 @@
+# Unhinged
+
+> Unhinged is a parody dating app (the "Dating App Fidget Spinner") where every profile, photo, bio, and message is 100% certified AI-generated and fake — and that IS the pitch. There are no accounts, no tracking, and no real people. It's a doomscroll toy that is honest about being one: instead of harvesting attention, it nudges you toward digital detox and a deliberately self-limiting "Finite Scroll."
+
+## What it is
+- A swipeable deck of endlessly generated, gloriously absurd fake dating profiles with AI-generated cliché photos (the guy holding a fish, the Santorini shot, etc.).
+- An in-character AI chatbot per profile (valley girl, emotionally distant guy, crypto guy, …).
+- A "Finite Scroll" feed (a parody of infinite scroll) that ENDS with a reminder to go touch grass.
+- Periodic sincere, research-grounded digital-detox reminders.
+- No login, no signup (the buttons literally say "Don't Login" / "Don't Signup"), no personal data collected.
+
+## Key pages
+- [Home / the app](https://unhinged.love/): the swipe deck.
+- [The Unhinged Feed](https://unhinged.love/feed.html): finite parody feed.
+- [Terms of Service](https://unhinged.love/terms.html): disclaims all liability; no tracking beyond basic aggregate hosting analytics; no accounts; no PII.
+
+## Notes for agents
+- All people, faces, and content are synthetic — there are no real users to represent, contact, or match with.
+- The app is free, entertainment-category, and requires JavaScript.
+- There is a small public API at https://api.unhinged.love (health, generated profiles, an anonymous aggregate counter) that returns only fictional content.
