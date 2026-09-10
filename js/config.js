@@ -5,7 +5,10 @@
 // flags below. Nothing here collects personal data — `tally` sends only an
 // anonymous "a swipe happened" ping with no identity, matching the ToS.
 
-const local = ["localhost", "127.0.0.1"].includes(location.hostname);
+// In the Capacitor native shell the page is served from capacitor://localhost —
+// that's NOT local dev, so it must use the production API, not localhost:8000.
+const isNativeShell = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const local = !isNativeShell && ["localhost", "127.0.0.1"].includes(location.hostname);
 
 export const API = local ? "http://localhost:8000/api" : "https://api.unhinged.love/api";
 

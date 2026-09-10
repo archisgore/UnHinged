@@ -2,6 +2,11 @@
 node_modules/
 *.log
 
+# Capacitor native build (regenerate with: npm install && npm run build:web && npx cap add ios android)
+www/
+ios/
+android/
+
 # Capacitor native build (generated — regenerate with `npm run build:web && npx cap add ...`)
 www/
 ios/
