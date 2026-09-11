@@ -19,7 +19,7 @@ from typing import Any
 from . import llm
 
 TEXT_DIR = os.environ.get("TEXT_DIR", "/data/text")
-CAP = 3000  # max items kept per bank
+CAP = 1000  # max items kept per bank; nightly appends roll the oldest out
 
 VOICE = ("for 'Unhinged', a parody dating app where every profile and photo is "
          "100% AI-generated fake and proud of it. Voice: witty, deadpan, self-aware, "

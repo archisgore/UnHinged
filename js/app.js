@@ -187,26 +187,28 @@ function startApp() {
   resetIdle();
 }
 
-// Backend-served profiles in RANDOM, no-repeat order. `seen` is per-session
-// memory so every user gets a unique, non-repeating experience; ids are biased
-// toward the warmed range (instant photos) and the pool grows as you swipe.
+// Backend-served profiles in RANDOM, no-repeat order, drawn from the current
+// rolling window [winStart, winEnd) — the fresh, cached, nightly-refreshed set.
+// `seen` is per-session memory so every user gets a unique, non-repeating deck.
 const remoteBuf = [];
 const seen = new Set();
-let warmFrontier = 0;
+let winStart = 0, winEnd = 0;
 let refilling = false;
 
 fetchCorpus().then((c) => {
-  if (c && typeof c.frontier === "number") warmFrontier = c.frontier;
+  if (c) { winStart = c.window_start || 0; winEnd = c.window_end || 0; }
   refillRemote(); // prefetch so the first cards are photos, not placeholders
 });
 
 function pickUnseenId() {
-  const pool = Math.max(warmFrontier, seen.size * 2 + 20, 60);
-  for (let t = 0; t < 60; t++) {
-    const id = Math.floor(Math.random() * pool);
+  const lo = winStart;
+  const hi = Math.max(winEnd, lo + 60); // usable pool even before warming
+  for (let t = 0; t < 80; t++) {
+    const id = lo + Math.floor(Math.random() * (hi - lo));
     if (!seen.has(id)) { seen.add(id); return id; }
   }
-  let id = 0;
+  for (let id = lo; id < hi; id++) if (!seen.has(id)) { seen.add(id); return id; }
+  let id = hi;
   while (seen.has(id)) id++;
   seen.add(id);
   return id;

@@ -6,12 +6,12 @@ name: warm-faces
 
 on:
   schedule:
-    - cron: "0 */3 * * *" # every 3 hours
+    - cron: "0 9 * * *" # nightly (~02:00 PT / 09:00 UTC)
   workflow_dispatch:
     inputs:
       chunk:
         description: "How many faces to bank this run"
-        default: "40"
+        default: "60"
 
 jobs:
   warm:
@@ -19,17 +19,17 @@ jobs:
     steps:
       - name: Bank the next chunk of faces
         run: |
-          CHUNK="${{ github.event.inputs.chunk || '40' }}"
-          echo "Kicking off background warm of $CHUNK faces…"
+          CHUNK="${{ github.event.inputs.chunk || '60' }}"
+          echo "Nightly: bank $CHUNK new faces + expire oldest beyond the 1000 cap…"
           curl -sS -X POST "https://api.unhinged.love/api/admin/warm?chunk=$CHUNK" \
             -H "x-admin-token: ${{ secrets.UNHINGED_ADMIN_TOKEN }}" \
             --max-time 60
           echo
-          echo "Corpus (warm runs in the background; grows over the next few minutes):"
+          echo "Corpus window (rolls forward nightly; runs in the background):"
           curl -sS "https://api.unhinged.love/api/corpus"
           echo
-          echo "Growing the text banks (taglines/bios/names/prompts/cards/pitches)…"
-          curl -sS -X POST "https://api.unhinged.love/api/admin/gentext?n=12" \
+          echo "Nightly: grow the text banks (rolling window, capped at 1000 each)…"
+          curl -sS -X POST "https://api.unhinged.love/api/admin/gentext?n=20" \
             -H "x-admin-token: ${{ secrets.UNHINGED_ADMIN_TOKEN }}" --max-time 60
           echo
           curl -sS "https://api.unhinged.love/api/text-stats"

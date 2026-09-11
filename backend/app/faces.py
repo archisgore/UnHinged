@@ -128,29 +128,40 @@ def get(fid: str, timeout: int = 30) -> str | None:
             return None
 
 
-# ── The growing corpus ────────────────────────────────────────────────────
-# A scheduled job (see .github/workflows/warm.yml) calls warm() periodically to
-# bank the next chunk of faces onto the volume, so the ready corpus keeps
-# growing over time toward "always fresh, effectively infinite".
+# ── The rolling corpus ─────────────────────────────────────────────────────
+# A nightly job (see .github/workflows/warm.yml) calls warm() to bank new faces
+# at the frontier (window_end) and expire the oldest beyond FACES_CAP (advancing
+# window_start). The result is a sliding window of at most FACES_CAP fresh faces:
+# new pictures roll in, old ones roll out, storage stays bounded.
 
-_FRONTIER = os.path.join(FACES_DIR, ".frontier")
+FACES_CAP = int(os.environ.get("FACES_CAP", "1000"))
+_FRONTIER = os.path.join(FACES_DIR, ".frontier")  # next id to generate (window_end)
+_FLOOR = os.path.join(FACES_DIR, ".floor")         # oldest kept id (window_start)
 
 
-def _read_frontier() -> int:
+def _read_int(path: str) -> int:
     try:
-        with open(_FRONTIER) as f:
+        with open(path) as f:
             return int(f.read().strip() or "0")
     except (OSError, ValueError):
         return 0
 
 
-def _write_frontier(n: int) -> None:
+def _write_int(path: str, n: int) -> None:
     try:
         os.makedirs(FACES_DIR, exist_ok=True)
-        with open(_FRONTIER, "w") as f:
+        with open(path, "w") as f:
             f.write(str(n))
     except OSError:
         pass
+
+
+def _read_frontier() -> int:
+    return _read_int(_FRONTIER)
+
+
+def _read_floor() -> int:
+    return _read_int(_FLOOR)
 
 
 def count_cached() -> int:
@@ -160,33 +171,64 @@ def count_cached() -> int:
         return 0
 
 
+def _prune_below(floor: int) -> int:
+    """Delete cached faces older than `floor` (expires old pictures)."""
+    removed = 0
+    try:
+        for f in os.listdir(FACES_DIR):
+            if not f.endswith(".jpg"):
+                continue
+            try:
+                fid = int(f[:-4])
+            except ValueError:
+                continue
+            if fid < floor:
+                try:
+                    os.remove(os.path.join(FACES_DIR, f))
+                    removed += 1
+                except OSError:
+                    pass
+    except OSError:
+        pass
+    return removed
+
+
 def corpus_stats() -> dict[str, Any]:
-    return {"cached_faces": count_cached(), "frontier": _read_frontier(), "faces_enabled": ENABLED}
+    return {
+        "cached_faces": count_cached(),
+        "window_start": _read_floor(),
+        "window_end": _read_frontier(),
+        "cap": FACES_CAP,
+        "faces_enabled": ENABLED,
+    }
 
 
 _warm_lock = threading.Lock()
 
 
 def warm(chunk: int = 40) -> dict[str, Any]:
-    """Grow the corpus by ~`chunk`, filling any MISSING ids up to the new
-    frontier (so rate-limit gaps self-heal) at a gentle pace. Cached ids are
-    skipped instantly, so re-scanning from 0 is cheap."""
+    """Bank `chunk` new faces at the frontier, then expire the oldest beyond
+    FACES_CAP — a rolling window of fresh pictures with bounded storage."""
     if not ENABLED:
         return {"enabled": False}
-    target = _read_frontier() + chunk
+    lo, hi = _read_floor(), _read_frontier()
     generated = 0
-    for i in range(target):
-        if os.path.exists(path_for(str(i))):
-            continue  # already banked
-        ok = get(str(i), timeout=120)
-        if not ok:  # transient rate-limit? back off and retry once
-            time.sleep(3)
+    for i in range(hi, hi + chunk):
+        if not os.path.exists(path_for(str(i))):
             ok = get(str(i), timeout=120)
-        if ok:
-            generated += 1
-        time.sleep(1.2)  # gentle on the shared free generator
-    _write_frontier(target)
-    return {"generated": generated, "frontier": target, "cached_faces": count_cached()}
+            if not ok:  # transient rate-limit? back off and retry once
+                time.sleep(3)
+                ok = get(str(i), timeout=120)
+            if ok:
+                generated += 1
+        _write_int(_FRONTIER, i + 1)
+        time.sleep(1.0)  # gentle on the shared free generator
+    hi += chunk
+    new_lo = max(lo, hi - FACES_CAP)  # expire oldest so the window ≤ cap
+    expired = _prune_below(new_lo)
+    _write_int(_FLOOR, new_lo)
+    return {"generated": generated, "expired": expired, "window_start": new_lo,
+            "window_end": hi, "cached_faces": count_cached()}
 
 
 def warm_async(chunk: int = 40) -> dict[str, Any]:
