@@ -7,6 +7,9 @@ name: deploy
 on:
   push:
     branches: [main]
+  # PRs run the smoke test + Pages artifact build, but never deploy.
+  pull_request:
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -25,10 +28,10 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "lts/*"
       - name: Install Playwright (chromium)
         working-directory: test
         run: npm install && npx playwright install --with-deps chromium
@@ -40,17 +43,24 @@ jobs:
           BASE=http://localhost:8000 node test/smoke.mjs
           kill $SERVER
 
-  deploy:
+  # Builds the Pages artifact. Runs on PRs too, to prove the artifact step works.
+  build:
     needs: smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
